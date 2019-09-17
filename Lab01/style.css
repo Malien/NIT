@@ -18,10 +18,18 @@ body {
 }
 header {
     display: flex;
+    position: fixed;
+    z-index: 1;
+    height: 100%;
+    width: 250px;
+    flex-shrink: 0;
     flex-direction: column;
     background-color: var(--header-color);
     padding: 20px;
     box-shadow: #00000044 5px 0px 8px;
+}
+.spacer {
+    margin-right: 290px;
 }
 header>.logo {
     margin-top: 40px;
@@ -105,7 +113,7 @@ a {
 }
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     padding: 2% 5%;
 }
 .grid-item {
@@ -185,9 +193,6 @@ a {
     font-weight: 600;
     box-shadow: #00000044 3px 3px 10px;
 }
-.spacer {
-    display: none;
-}
 
 @media (max-width: 980px) {
     footer {
@@ -199,6 +204,7 @@ a {
     header {
         position: fixed;
         width: 100%;
+        height: auto;
         z-index: 1;
         align-items: center;
         justify-content: center;
