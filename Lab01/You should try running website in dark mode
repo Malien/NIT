@@ -3,3 +3,5 @@ If you turn system appearence on windows 10 or mac os Mojave to dark mode, webpa
 If you can't set appearence in your os just comment out "@media (prefers-color-scheme: dark)" part.
 
 Also I don't know why I shipped 1x and 0.5x assets when I have SVGs, but that's just what my Adobe Illustrator settings are set to export
+
+And please don't take away point for leaving this message

@@ -91,6 +91,9 @@ footer>.logo {
     font-family: var(--font);
     font-weight: 650;
 }
+.text-bold>a {
+    text-decoration: none;
+}
 .copyright {
     color: var(--text-color);
     position: absolute;
@@ -191,6 +194,11 @@ a {
     font-size: 24px;
     font-weight: 600;
     box-shadow: #00000044 3px 3px 10px;
+}
+.print-message {
+    display: none;
+    font-family:  var(--font);
+    font-size: 24px;
 }
 
 @media (max-width: 980px) {
@@ -306,6 +314,9 @@ a {
     .logo {
         /* white logo on white paper don't mixup very well */
         filter: invert();
+    }
+    .print-message {
+        display: inline;
     }
     :root {
         /* Make sure we are printing in light mode */
