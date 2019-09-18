@@ -26,7 +26,7 @@ header {
     flex-direction: column;
     background-color: var(--header-color);
     padding: 20px;
-    box-shadow: #00000044 5px 0px 8px;
+    box-shadow: var(--shadow-color) 5px 0px 8px;
 }
 .spacer {
     margin-right: 290px;
@@ -282,13 +282,42 @@ a {
         display: none;
     }
     .content-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100pt, 1fr));
+        /* Make content appear a bit more condensed on papar than on webpage */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    .grid-item {
+        margin: 0;
+        width: 100%;
+        border-radius: 0;
+        border: 1px solid #ccc;
+        /* I don't know why, but it still cuts through the grid-item elements while printing */
+        page-break-inside: avoid;
+    }
+    .grid-item::before {
+        display: none;
     }
     header {
         display: none;
+        position: absolute;
     }
-    spacer {
+    .spacer {
         display: none;
+    }
+    .logo {
+        /* white logo on white paper don't mixup very well */
+        filter: invert();
+    }
+    :root {
+        /* Make sure we are printing in light mode */
+        --header-color: #3498db;
+        --header-subcolor: #5870D6;
+        --footer-color: #fff;
+        --footer-smog: linear-gradient(90deg, rgba(88,112,214,1) 0%, rgba(88,112,214,0) 15%, rgba(88,112,214,0) 85%, rgba(88,112,214,1) 100%);
+        --shadow-color: #00000044;
+        --ok-color: #6FE673;
+        --text-color: #505050;
+        --subtext-color: #909090;
+        --background-color: #fff;
     }
 }
 
@@ -298,9 +327,9 @@ a {
         --header-subcolor: #223C5B;
         --footer-color: #091C32;
         --footer-smog: linear-gradient(90deg, rgba(34,60,91,1) 0%, rgba(34,60,91,0) 15%, rgba(34,60,91,0) 85%, rgba(34,60,91,1) 100%);
+        /* Making shadows darker */
         --shadow-color: #00000088;
         --ok-color: rgb(100, 207, 104);
-        --font: 'Helvetica Neue', sans-serif;
         --text-color: #d8d8d8;
         --subtext-color: #c2c2c2;
         --background-color: #293045;

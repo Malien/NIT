@@ -1,0 +1,3 @@
+If you turn system appearence on windows 10 or mac os Mojave to dark mode, webpage looks geourgeus in dark
+
+If you can't set appearence in your os just comment out "@media (prefers-color-scheme: dark)" part.
