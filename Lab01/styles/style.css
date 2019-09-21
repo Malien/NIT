@@ -5,6 +5,7 @@
     --footer-smog: linear-gradient(90deg, rgba(88,112,214,1) 0%, rgba(88,112,214,0) 15%, rgba(88,112,214,0) 85%, rgba(88,112,214,1) 100%);
     --shadow-color: #00000044;
     --ok-color: #6FE673;
+    --ok-pressed: #5ec561;
     --font: 'Helvetica Neue', sans-serif;
     --text-color: #505050;
     --subtext-color: #909090;
@@ -116,7 +117,7 @@ a {
 .content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    padding: 2% 5%;
+    padding: 0 5% 20px 5%;
 }
 .grid-item {
     width: 90%;
@@ -183,6 +184,7 @@ a {
 .item-button {
     appearance: none;
     -webkit-appearance: none;
+    cursor: pointer;
     background-color: var(--ok-color);
     border: none;
     border-radius: 25px;
@@ -195,10 +197,24 @@ a {
     font-weight: 600;
     box-shadow: #00000044 3px 3px 10px;
 }
+.item-button:active {
+    background-color: var(--ok-pressed);
+}
 .print-message {
     display: none;
     font-family:  var(--font);
     font-size: 24px;
+}
+.category-title {
+    font-family: var(--font);
+    color: var(--text-color);
+    font-size: 42px;
+    margin: 0 5%;
+    padding-top: 10px;
+    border-top: 3px solid var(--subtext-color);
+}
+.category-title:first-of-type {
+    border: none;
 }
 
 @media (max-width: 980px) {
@@ -326,6 +342,7 @@ a {
         --footer-smog: linear-gradient(90deg, rgba(88,112,214,1) 0%, rgba(88,112,214,0) 15%, rgba(88,112,214,0) 85%, rgba(88,112,214,1) 100%);
         --shadow-color: #00000044;
         --ok-color: #6FE673;
+        --ok-pressed: #5ec561;
         --text-color: #505050;
         --subtext-color: #909090;
         --background-color: #fff;
@@ -340,7 +357,8 @@ a {
         --footer-smog: linear-gradient(90deg, rgba(34,60,91,1) 0%, rgba(34,60,91,0) 15%, rgba(34,60,91,0) 85%, rgba(34,60,91,1) 100%);
         /* Making shadows darker */
         --shadow-color: #00000088;
-        --ok-color: rgb(100, 207, 104);
+        --ok-color: #64cf68;
+        --ok-pressed: #55b158;
         --text-color: #d8d8d8;
         --subtext-color: #c2c2c2;
         --background-color: #293045;
