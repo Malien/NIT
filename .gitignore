@@ -1,2 +1,7 @@
 .DS_Store
 *.zip
+tmp
+
+node_modules
+.next
+next-env.d.ts

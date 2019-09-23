@@ -72,7 +72,7 @@ footer {
     width: 100%;
     background-color: var(--footer-color);
     --text-color: white;
-    --subtext-color: #d6d6d6;
+    --subtext-color: rgb(214, 214, 214);
     display: flex;
     align-items: center;
     font-size: 24px;
