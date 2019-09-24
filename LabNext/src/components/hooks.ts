@@ -9,7 +9,7 @@ export function useResize<T extends HTMLElement>(ref: React.RefObject<T>, cb: (b
     useEffect(() => {
         let el = ref.current
         const listener = () => {
-            if (el) cb({width: el.clientWidth, height: el.clientHeight}, el)
+            if (el) cb({width: el.offsetWidth, height: el.offsetHeight}, el)
         }
         if (el) el.addEventListener("resize", listener)
         return () => {
@@ -25,7 +25,7 @@ export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaul
     let [bounds, setBounds] = useState<Bounds | undefined>(defaultVal)
     useEffect(() => {
         let el = ref.current
-        if (el) setBounds({width: el.clientWidth, height: el.clientHeight})
+        if (el) setBounds({width: el.offsetWidth, height: el.offsetHeight})
     }, [ref])
     useResize(ref, bounds => setBounds(bounds))
     return bounds

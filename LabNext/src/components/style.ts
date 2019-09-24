@@ -9,10 +9,14 @@ export interface Theme {
     alternateTextSubcolor: string;
     footerColor: string;
     backgroundColor: string;
+    shadowColor: string;
 }
 
 export interface Look {
     font: string;
+    strongFont: string;
+    stringLineHeight: number;
+    extraLarge: number;
     largeSize: number;
     mediumSize: number;
     smallSize: number;
@@ -27,7 +31,8 @@ export const Light: Theme = {
     alternateTextColor: "#fff",
     alternateTextSubcolor: "#d6d6d6",
     footerColor: "#707070",
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
+    shadowColor: "##00000044"
 }
 
 export const Dark: Theme = {
@@ -38,11 +43,15 @@ export const Dark: Theme = {
     subtextColor: "#c2c2c2",
     alternateTextColor: "#fff",
     alternateTextSubcolor: "#d6d6d6",
-    backgroundColor: "#293045"
+    backgroundColor: "#293045",
+    shadowColor: "#00000088"
 }
 
 export const Vanila: Look = {
     font: "'Helvetica Neue', sans-serif",
+    strongFont: "'Libre Baskerville', cursive",
+    stringLineHeight: 1,
+    extraLarge: 72,
     largeSize: 36,
     mediumSize: 28,
     smallSize: 20,

@@ -164,6 +164,7 @@ export const AppFrame: React.FC = props => {
     }, [])
 
     return <>
+        <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:700&display=swap" rel="stylesheet" />
         <ThemeContext.Provider value={theme}>
             <style global jsx>{`
                 body {
