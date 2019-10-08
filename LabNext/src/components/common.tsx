@@ -155,7 +155,6 @@ export const AppFrame: React.FC = props => {
         setTheme(match ? Dark : Light)
 
         function match_func({ matches }: MediaQueryListEvent) {
-            console.log(matches)
             if (matches) setTheme(Dark)
             else setTheme(Light)
         }

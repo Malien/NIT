@@ -1,5 +1,5 @@
-import React, { FunctionComponent, Children, useState, useEffect, useRef } from "react"
-import { useResize, useBounds } from "./hooks"
+import React, { FunctionComponent, Children, useState, useEffect, useRef, useMemo } from "react"
+import { useBounds } from "./hooks"
 
 export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => void) {
     useEffect(() => {
@@ -93,7 +93,6 @@ interface StackedProps {
 export const VSpaced: FunctionComponent<StackedProps> = props => {
     let elRef = useRef<HTMLDivElement>(null)
     let { height } = useBounds(elRef, { width: 0, height: 0 })
-    console.log(height)
 
     return <>
         <style jsx>{`
@@ -103,5 +102,39 @@ export const VSpaced: FunctionComponent<StackedProps> = props => {
         `}</style>
         <div className="spacer" />
         <div className={props.className} ref={elRef}>{props.children}</div>
+    </>
+}
+
+interface GridCellProps {
+    width: number;
+    height: number;
+}
+export const GridCell: React.FC<GridCellProps> = props => <>{props.children}</>
+
+interface AdaptiveGridProps {
+    columnWidth: number;
+    children: React.ReactElement<GridCellProps>
+}
+export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
+    let gridRef = useRef<HTMLDivElement>(null)
+    let { width } = useBounds(gridRef, { height: 0, width: 0 })
+    let columns = Math.floor(width / props.columnWidth)
+
+    let transformed = useMemo(() => {
+            return React.Children.map(props.children, (node: React.ReactElement<GridCellProps>, index) => (
+                <div key={index} style={{gridRow: `span ${node.props.width}`, gridColumn: `span ${node.props.height}`}}>
+                    {node}
+                </div>
+            ))
+        }, [columns, props.children]
+    )
+
+    return <>
+        <style jsx>{`
+            
+        `}</style>
+        <div className="grid" ref={gridRef}>
+            {transformed}
+        </div>
     </>
 }

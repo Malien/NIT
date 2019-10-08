@@ -30,3 +30,23 @@ export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaul
     useResize(ref, bounds => setBounds(bounds))
     return bounds
 }
+
+export function useHover<T extends HTMLElement>(ref: React.RefObject<T>) {
+    let [hovered, setHovered] = useState(false)
+    useEffect(() => {
+        let el = ref.current
+        let enter = () => setHovered(true)
+        let leave = () => setHovered(false)
+        if (el) {
+            el.addEventListener("mouseenter", enter)
+            el.addEventListener("mouseleave", leave)
+        }
+        return () => {
+            if (el) {
+                el.removeEventListener("mouseenter", enter)
+                el.removeEventListener("mouseleave", leave)
+            }
+        }
+    }, [ref])
+    return hovered
+}
