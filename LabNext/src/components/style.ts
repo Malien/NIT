@@ -21,6 +21,7 @@ export interface Look {
     mediumSize: number;
     smallSize: number;
     subSmallSize: number;
+    boldWeight: number;
 }
 
 export const Light: Theme = {
@@ -55,7 +56,8 @@ export const Vanila: Look = {
     largeSize: 36,
     mediumSize: 28,
     smallSize: 20,
-    subSmallSize: 16
+    subSmallSize: 16,
+    boldWeight: 600
 }
 
 export const ThemeContext = createContext(Light)

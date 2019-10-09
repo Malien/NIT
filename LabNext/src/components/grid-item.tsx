@@ -18,7 +18,26 @@ function splitName(name: string): [string, string] {
 interface StarRatingProps {
     rating: number;
 }
-export const StarRating: React.FC<StarRatingProps> = props => <></>
+export const StarRating: React.FC<StarRatingProps> = props => {
+    let out: JSX.Element[] = []
+    for (let i=0; i<props.rating; ++i) {
+        out.push(<div style={{
+            width: "20px",
+            height: "20px",
+            borderRadius: "5px",
+            margin: "5px",
+            backgroundColor: "yellow"
+        }} />)
+    }
+    return <>
+        <style jsx>{`
+            div {
+                display: flex;
+            }
+        `}</style>
+        <div>{out}</div>
+    </>
+}
 
 export const GridItem: React.FC<StoreItem> = props => {
     let [curImg, setCurImg] = useState(props.previews[0])
@@ -48,8 +67,8 @@ export const GridItem: React.FC<StoreItem> = props => {
         <style jsx>{`
             .container {
                 /* overflow: hidden; */
-                width: 100%;
-                height: 100%;
+                width: calc(100% - 20px);
+                height: calc(100% - 20px);
                 position: relative;
                 background-image: url("${curImg}");
                 background-size: cover;
@@ -82,6 +101,81 @@ export const GridItem: React.FC<StoreItem> = props => {
                 line-height: ${look.stringLineHeight * 100}%;
                 font-size: ${look.extraLarge}px;
             }
+            .desc {
+                /* font-family: ${look.font} */
+                font-size: ${look.smallSize}px;
+            }
+            .price {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                font-size: ${look.mediumSize}px;
+                width: 100%;
+            }
+            .price>span {
+                margin: 10px;
+            }
+            .prev {
+                text-decoration: line-through;
+                color: ${theme.subtextColor};
+            }
+            button {
+                appearance: none;
+                position: relative;
+                height: 2em;
+                border: none;
+                background: none;
+                color: ${theme.alternateTextColor};
+                display: flex;
+                align-items: center;
+                font-family: ${look.font};
+                font-size: ${look.mediumSize}px;
+                border: solid 4px #970097;
+                border-radius: 1em;
+                padding: 0 20px;
+                flex-shrink: 0;
+                flex-wrap: wrap;
+                font-weight: ${look.boldWeight};
+            }
+            button::before {
+                z-index: -1;
+                width: 100%;
+                height: 100%;
+                border-radius: 1em;
+                background-color: #970097;
+                content: "";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                opacity: 0;
+                transition: opacity 0.2s 0s ease-in;
+            }
+            button::after {
+                content: "";
+                display: block;
+                width: 100%;
+                height: 100%;
+                border-radius: 1em;
+                position: absolute;
+                top: -4px;
+                left: -4px;
+                border: 4px solid white;
+                opacity: 0;
+                /*transition: opacity 0.1s 0s ease-in;*/
+            }
+            button:active::after {
+                /*opacity: 1;*/
+            }
+            button:active::before {
+                background-color: purple;
+            }
+            button:hover::before {
+                opacity: 1;
+            }
+            .bottom {
+                margin: 10px 0;
+            }
         `}</style>
         <div className="container" ref={contentRef}>
             {/* <div className="spacer" /> */}
@@ -94,8 +188,8 @@ export const GridItem: React.FC<StoreItem> = props => {
                         <div className="price">
                             {props.prevPrice && <span className="prev">{props.prevPrice}</span>}
                             <span className="cur">{props.price}</span>
+                            <button>Add to cart</button>
                         </div>
-                        <button>Buy</button>
                     </div>
                 </div>
             </div>

@@ -113,25 +113,41 @@ export const GridCell: React.FC<GridCellProps> = props => <>{props.children}</>
 
 interface AdaptiveGridProps {
     columnWidth: number;
-    children: React.ReactElement<GridCellProps>
+    rowHeight: number;
+    children: React.ReactElement<GridCellProps>[];
+    responsive?: boolean;
 }
 export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
     let gridRef = useRef<HTMLDivElement>(null)
     let { width } = useBounds(gridRef, { height: 0, width: 0 })
     let columns = Math.floor(width / props.columnWidth)
+    console.log(columns, width, props.columnWidth, width / props.columnWidth)
 
     let transformed = useMemo(() => {
-            return React.Children.map(props.children, (node: React.ReactElement<GridCellProps>, index) => (
-                <div key={index} style={{gridRow: `span ${node.props.width}`, gridColumn: `span ${node.props.height}`}}>
-                    {node}
-                </div>
-            ))
-        }, [columns, props.children]
+        return React.Children.map(props.children, (node: React.ReactElement<GridCellProps>, index) => {
+            let h = Math.min(node.props.height, columns)
+            let w = Math.min(node.props.width, columns)
+            if (props.responsive && columns == 1) h *= 1.5; 
+            return <div key={index} style={
+                {
+                    gridRow: `span ${h}`, 
+                    gridColumn: `span ${w}`,
+                    height: props.rowHeight * h
+                }
+            }>
+                {node}
+            </div>
+        })}, [columns, props.children]
     )
 
     return <>
         <style jsx>{`
-            
+            .grid {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(${props.columnWidth}px, 1fr));
+                grid-template-rows: repeat(auto-fit, ${(props.responsive && columns == 1) ? props.rowHeight * 1.5 : props.rowHeight}px);
+            }
         `}</style>
         <div className="grid" ref={gridRef}>
             {transformed}

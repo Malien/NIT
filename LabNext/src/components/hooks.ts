@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react"
+import ResizeObserver from "resize-observer-polyfill"
+
+// const ResizeObserver = ((window as any).ResizeObserver || Pollyfil) as Pollyfil
 
 export interface Bounds {
     width: number;
@@ -7,13 +10,14 @@ export interface Bounds {
 
 export function useResize<T extends HTMLElement>(ref: React.RefObject<T>, cb: (bounds: Bounds, element: T) => void) {
     useEffect(() => {
+        let ro = new ResizeObserver(entries => {
+            let el = entries[0].target as T
+            cb({ width: el.offsetWidth, height: el.offsetHeight }, el)
+        })
         let el = ref.current
-        const listener = () => {
-            if (el) cb({width: el.offsetWidth, height: el.offsetHeight}, el)
-        }
-        if (el) el.addEventListener("resize", listener)
+        if (el) ro.observe(el)
         return () => {
-            if (el) el.removeEventListener("resize", listener)
+            if (el) ro.unobserve(el)
         }
     }, [ref])
 }
@@ -22,10 +26,10 @@ export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaul
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>): Bounds | undefined;
 
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaultVal?: Bounds) {
-    let [bounds, setBounds] = useState<Bounds | undefined>(defaultVal)
+    let [bounds, setBounds] = useState(defaultVal)
     useEffect(() => {
         let el = ref.current
-        if (el) setBounds({width: el.offsetWidth, height: el.offsetHeight})
+        if (el) setBounds({ width: el.offsetWidth, height: el.offsetHeight })
     }, [ref])
     useResize(ref, bounds => setBounds(bounds))
     return bounds

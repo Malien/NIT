@@ -15,7 +15,6 @@ export function scrollTo(el: HTMLElement, x: number, y: number, duration: number
     let start: number | undefined
     let animation = (timestamp: number) => {
         if (!start) start = timestamp - 1
-        debugger
         let per = func((timestamp - start) / duration)
         if (per <= 0.98) {
             el.scrollTo(xStart + (x - xStart)*per, yStart + (y-yStart)*per)
