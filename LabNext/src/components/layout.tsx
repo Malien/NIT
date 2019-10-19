@@ -1,5 +1,6 @@
 import React, { FunctionComponent, Children, useState, useEffect, useRef, useMemo } from "react"
 import { useBounds } from "./hooks"
+import { PriorityQueue, ExtendableMat } from "../util/structures"
 
 export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => void) {
     useEffect(() => {
@@ -121,24 +122,56 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
     let gridRef = useRef<HTMLDivElement>(null)
     let { width } = useBounds(gridRef, { height: 0, width: 0 })
     let columns = Math.floor(width / props.columnWidth)
-    console.log(columns, width, props.columnWidth, width / props.columnWidth)
 
     let transformed = useMemo(() => {
+        let placemap = new ExtendableMat(columns, false)
+
         return React.Children.map(props.children, (node: React.ReactElement<GridCellProps>, index) => {
             let h = Math.min(node.props.height, columns)
             let w = Math.min(node.props.width, columns)
-            if (props.responsive && columns == 1) h *= 1.5; 
-            return <div key={index} style={
-                {
-                    gridRow: `span ${h}`, 
-                    gridColumn: `span ${w}`,
-                    height: props.rowHeight * h
+            if (props.responsive && columns == 1) h *= 1.5;
+
+            return {
+                element: <div key={index} style={
+                    {
+                        gridRow: `span ${h}`,
+                        gridColumn: `span ${w}`,
+                        height: props.rowHeight * h
+                    }
+                }>
+                    {node}
+                </div>,
+                width: w,
+                height: h
+            }
+        }).map(({ element, width, height }) => {
+            let y = 0
+            while (true) {
+                for (let x = 0; x <= columns - width; ++x) {
+                    let free = true
+                    check:
+                    for (let i = 0; i < height; ++i) {
+                        for (let j = 0; j < width; ++j) {
+                            if (placemap[y + i][x + j]) {
+                                free = false
+                                break check;
+                            }
+                        }
+                    }
+                    if (free) {
+                        for (let i = 0; i < height; ++i)
+                            for (let j = 0; j < width; ++j)
+                                placemap[y + i][x + j] = true
+                        return { element, index: y * columns + x }
+                    }
                 }
-            }>
-                {node}
-            </div>
-        })}, [columns, props.children]
-    )
+                y++
+            }
+        }).sort((a, b) => a.index - b.index)
+        .map(v => v.element)
+    }, [columns, props.children])
+
+    console.log(transformed)
 
     return <>
         <style jsx>{`

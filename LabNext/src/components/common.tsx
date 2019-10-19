@@ -188,6 +188,7 @@ export const AppFrame: React.FC = props => {
                     width: 100%;
                     min-height: 100vh;
                     position: relative;
+                    overflow-x: hidden;
                 }
             `}</style>
             <div className="app">

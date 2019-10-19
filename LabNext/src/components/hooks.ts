@@ -8,13 +8,18 @@ export interface Bounds {
     height: number;
 }
 
-export function useResize<T extends HTMLElement>(ref: React.RefObject<T>, cb: (bounds: Bounds, element: T) => void) {
+export function useResize<T extends HTMLElement>(ref: React.RefObject<T> | T, cb: (bounds: Bounds, element: T) => void) {
     useEffect(() => {
+        let el: T | null
+        if (ref instanceof HTMLElement) {
+            el = ref
+        } else {
+            el = ref.current
+        }
         let ro = new ResizeObserver(entries => {
             let el = entries[0].target as T
             cb({ width: el.offsetWidth, height: el.offsetHeight }, el)
         })
-        let el = ref.current
         if (el) ro.observe(el)
         return () => {
             if (el) ro.unobserve(el)

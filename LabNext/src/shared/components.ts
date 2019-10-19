@@ -14,4 +14,5 @@ export interface StoreItem {
     size?: string;
     criteriaTable?: object;
     variants?: StoreItem[]
+    bias?: number // Possible user-tracked bias to a product to promote it to the top
 }
