@@ -71,6 +71,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                 height: calc(100% - 20px);
                 position: relative;
                 background-image: url("${curImg}");
+                ${props.outOfStock ? "filter: saturate(50%);" : ""}
                 background-size: cover;
                 background-position: center center;
                 margin: 10px;
@@ -178,7 +179,6 @@ export const GridItem: React.FC<StoreItem> = props => {
             }
         `}</style>
         <div className="container" ref={contentRef}>
-            {/* <div className="spacer" /> */}
             <div className="scroll" ref={scrollRef}>
                 <div className="info" ref={infoRef}>
                     <span className="title" ref={nameRef}>{name1}<br />{name2}</span>
@@ -188,7 +188,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                         <div className="price">
                             {props.prevPrice && <span className="prev">{props.prevPrice}</span>}
                             <span className="cur">{props.price}</span>
-                            <button>Add to cart</button>
+                            {props.outOfStock ? "Out of stock" : <button>Add to cart</button>}
                         </div>
                     </div>
                 </div>

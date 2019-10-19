@@ -35,6 +35,7 @@ let items: StoreItem[] = [
         tags:[],
         price:39.99,
         rating:3,
+        outOfStock: true
     },
     {
         name:"Khaki overalls",
