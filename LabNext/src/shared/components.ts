@@ -15,4 +15,5 @@ export interface StoreItem {
     criteriaTable?: object;
     variants?: StoreItem[]
     bias?: number // Possible user-tracked bias to a product to promote it to the top
+    outOfStock?: boolean
 }

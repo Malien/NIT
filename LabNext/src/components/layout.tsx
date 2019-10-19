@@ -144,7 +144,9 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
                 width: w,
                 height: h
             }
-        }).map(({ element, width, height }) => {
+        })
+        .sort((a, b) => b.height*b.width - a.height*a.width)
+        .map(({ element, width, height }) => {
             let y = 0
             while (true) {
                 for (let x = 0; x <= columns - width; ++x) {

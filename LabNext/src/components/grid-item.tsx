@@ -47,7 +47,7 @@ export const GridItem: React.FC<StoreItem> = props => {
     let nameRef = useRef<HTMLSpanElement>(null)
     let { height: nameHeight } = useBounds(nameRef, { height: 0, width: 0 })
     let contentRef = useRef<HTMLDivElement>(null)
-    let { height: contentHeight } = useBounds(contentRef, { height: 0, width: 0 })
+    let { height: contentHeight, width: contentWidth } = useBounds(contentRef, { height: 0, width: 0 })
     let infoRef = useRef<HTMLDivElement>(null)
     let { height: infoHeight } = useBounds(infoRef, { height: 0, width: 0 })
     let scrollRef = useRef<HTMLDivElement>(null)
@@ -99,7 +99,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                 color: ${theme.alternateTextColor};
                 font-family: ${look.strongFont};
                 line-height: ${look.stringLineHeight * 100}%;
-                font-size: ${look.extraLarge}px;
+                font-size: ${(contentWidth > 350) ? look.extraLarge : (look.largeSize + look.extraLarge) /2 }px;
             }
             .desc {
                 /* font-family: ${look.font} */
