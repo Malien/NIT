@@ -1,29 +1,32 @@
-import React, { FunctionComponent, Children, useState, useEffect, useRef, useMemo } from "react"
-import { useBounds } from "./hooks"
-import { PriorityQueue, ExtendableMat } from "../util/structures"
+import React, { FunctionComponent, Children, useState, useEffect, useRef, useMemo, useContext } from "react"
+import { useBounds, useKeyDown, useCancel } from "./hooks"
+import { ExtendableMat } from "../util/structures"
+import { ThemeContext } from "./style"
 
-export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => void) {
-    useEffect(() => {
-        document.addEventListener("keydown", listener)
-        return () => { document.removeEventListener("keydown", listener) }
-    })
+interface ThumbListProps {
+    columns: number;
+    thumbSize: number | string;
+    notop?: boolean;
 }
 
-export const List: FunctionComponent = props => {
-    let liNodes = Children.map(props.children, (node) => <li className="layout-list-item">{node}<div className="layout-list-divider" /></li>)
-    return (
-        <ul className="layout-list">
-            {liNodes}
-        </ul>
-    )
-}
-List.displayName = "List"
+export const ThumbList: FunctionComponent<ThumbListProps> = ({ children, columns, thumbSize, notop }) => {
+    let theme = useContext(ThemeContext)
+    let divider = <div style={{
+        width: "95%",
+        float: "left",
+        height: 1,
+        backgroundColor: theme.alternateTextSubcolor,
+        gridColumn: ` 2 / span ${columns - 1}`
+    }} />
 
-export const ThumbList: FunctionComponent = ({ children }) => {
-    let liNodes = Children.map(children, node => <>{node}<div className="layout-tlist-divider" /></>)
+    let liNodes = Children.map(children, node => <>{node}{divider}</>)
     return (
-        <div className="layout-tlist">
-            <div className="layout-tlist-divider" />
+        <div style={{
+            display: "grid",
+            gridTemplateColumns: `${(typeof thumbSize === "number") ? `${thumbSize}px` : thumbSize} ${
+                Array<string>(columns - 1).fill("auto", 0, columns - 1).join(" ")}`
+        }}>
+            {!notop && divider}
             {liNodes}
         </div>
     )
@@ -87,11 +90,11 @@ export const Dropdown: FunctionComponent<DropdownProps> = props => {
 }
 Dropdown.displayName = "Dropdown"
 
-interface StackedProps {
-    className?: string;
+interface VSpacedProps {
+    style: React.CSSProperties;
 }
 
-export const VSpaced: FunctionComponent<StackedProps> = props => {
+export const VSpaced: FunctionComponent<VSpacedProps> = props => {
     let elRef = useRef<HTMLDivElement>(null)
     let { height } = useBounds(elRef, { width: 0, height: 0 })
 
@@ -102,7 +105,7 @@ export const VSpaced: FunctionComponent<StackedProps> = props => {
             }
         `}</style>
         <div className="spacer" />
-        <div className={props.className} ref={elRef}>{props.children}</div>
+        <div style={{ position: "absolute", ...props.style }} ref={elRef}>{props.children}</div>
     </>
 }
 
@@ -145,35 +148,33 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
                 height: h
             }
         })
-        .sort((a, b) => b.height*b.width - a.height*a.width)
-        .map(({ element, width, height }) => {
-            let y = 0
-            while (true) {
-                for (let x = 0; x <= columns - width; ++x) {
-                    let free = true
-                    check:
-                    for (let i = 0; i < height; ++i) {
-                        for (let j = 0; j < width; ++j) {
-                            if (placemap[y + i][x + j]) {
-                                free = false
-                                break check;
+            .sort((a, b) => b.height * b.width - a.height * a.width)
+            .map(({ element, width, height }) => {
+                let y = 0
+                while (true) {
+                    for (let x = 0; x <= columns - width; ++x) {
+                        let free = true
+                        check:
+                        for (let i = 0; i < height; ++i) {
+                            for (let j = 0; j < width; ++j) {
+                                if (placemap[y + i][x + j]) {
+                                    free = false
+                                    break check;
+                                }
                             }
                         }
+                        if (free) {
+                            for (let i = 0; i < height; ++i)
+                                for (let j = 0; j < width; ++j)
+                                    placemap[y + i][x + j] = true
+                            return { element, index: y * columns + x }
+                        }
                     }
-                    if (free) {
-                        for (let i = 0; i < height; ++i)
-                            for (let j = 0; j < width; ++j)
-                                placemap[y + i][x + j] = true
-                        return { element, index: y * columns + x }
-                    }
+                    y++
                 }
-                y++
-            }
-        }).sort((a, b) => a.index - b.index)
-        .map(v => v.element)
+            }).sort((a, b) => a.index - b.index)
+            .map(v => v.element)
     }, [columns, props.children])
-
-    console.log(transformed)
 
     return <>
         <style jsx>{`

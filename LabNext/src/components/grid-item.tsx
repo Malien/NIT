@@ -21,7 +21,7 @@ interface StarRatingProps {
 export const StarRating: React.FC<StarRatingProps> = props => {
     let out: JSX.Element[] = []
     for (let i=0; i<props.rating; ++i) {
-        out.push(<div style={{
+        out.push(<div key={i} style={{
             width: "20px",
             height: "20px",
             borderRadius: "5px",
@@ -118,7 +118,7 @@ export const GridItem: React.FC<StoreItem> = props => {
             }
             .prev {
                 text-decoration: line-through;
-                color: ${theme.subtextColor};
+                color: ${theme.textSubcolor};
             }
             button {
                 appearance: none;
@@ -131,7 +131,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                 align-items: center;
                 font-family: ${look.font};
                 font-size: ${look.mediumSize}px;
-                border: solid 4px #970097;
+                border: solid 4px ${theme.alternativeColor};
                 border-radius: 1em;
                 padding: 0 20px;
                 flex-shrink: 0;
@@ -143,7 +143,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                 width: 100%;
                 height: 100%;
                 border-radius: 1em;
-                background-color: #970097;
+                background-color: ${theme.alternativeColor};
                 content: "";
                 display: block;
                 position: absolute;
@@ -169,9 +169,16 @@ export const GridItem: React.FC<StoreItem> = props => {
                 /*opacity: 1;*/
             }
             button:active::before {
-                background-color: purple;
+                background-color: ${theme.alternativeSubcolor};
             }
             button:hover::before {
+                opacity: 1;
+            }
+            button:disabled {
+                border: none;
+            }
+            button:disabled::before {
+                background-color: ${theme.disabledColor};
                 opacity: 1;
             }
             .bottom {
@@ -191,9 +198,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                         <div className="price">
                             {props.prevPrice && <span className="prev">{props.prevPrice}</span>}
                             <span className="cur">{props.price}</span>
-                            {props.outOfStock 
-                                ? <span className="nostock">Out of stock</span> 
-                                : <button>Add to cart</button>}
+                            <button disabled={props.outOfStock}>{props.outOfStock ? "Out of stock" : "Add to cart"}</button>
                         </div>
                     </div>
                 </div>

@@ -4,6 +4,9 @@ import Link from "next/link"
 import { ThemeContext, LookContext, Light, Dark } from "./style";
 import { VSpaced } from "./layout";
 
+//TODO: provide default image for product
+export const defaultImage = "";
+
 interface NavLinkProps {
     thumb: string;
     label: string;
@@ -142,7 +145,7 @@ export const Footer: React.FC = props => {
                     <span className="text-bold">Should I have one?</span>
                 </div>
             </div>
-            <span className="copyright ">© Petryk Yaroslav. 2019</span>
+            <span className="copyright ">© Petryk Yaroslav. 2019. Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</span>
         </footer>
     </>
 }
@@ -174,11 +177,6 @@ export const AppFrame: React.FC = props => {
                 a {
                     color: inherit;
                 }
-                .footer {
-                    position: absolute;
-                    bottom: 0;
-                    width: 100%;
-                }
             `}</style>
             <style jsx>{`
                 .app {
@@ -195,7 +193,7 @@ export const AppFrame: React.FC = props => {
                 <Sidebar />
                 <div className="content">
                     {props.children}
-                    <VSpaced className="footer">
+                    <VSpaced style={{ bottom: 0, width: "100%"}}>
                         <Footer />
                     </VSpaced>
                 </div>

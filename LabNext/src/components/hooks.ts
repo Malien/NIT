@@ -8,6 +8,31 @@ export interface Bounds {
     height: number;
 }
 
+export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => void, deps: any[] = []) {
+    useEffect(() => {
+        document.addEventListener("keydown", listener)
+        return () => {document.removeEventListener("keydown", listener)}
+    }, deps)
+}
+
+export function useCancel<T extends HTMLElement>(ref: React.RefObject<T>, cb: () => void, deps: any[] = []) {
+    useEffect(() => {
+        const mfunc = (event: MouseEvent) => {
+            let el = ref.current
+            if (el
+                && event.target 
+                && !el.contains(event.target as Node)
+            ) cb()
+        }
+        document.addEventListener("click", mfunc)
+        return () => document.removeEventListener("click", mfunc)
+    }, [ref, ...deps])
+
+    useKeyDown((event) => {
+        if (event.key === "Escape") cb()
+    }, deps)
+}
+
 export function useResize<T extends HTMLElement>(ref: React.RefObject<T> | T, cb: (bounds: Bounds, element: T) => void) {
     useEffect(() => {
         let el: T | null

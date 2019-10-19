@@ -30,7 +30,7 @@ export const Section: React.FC<SectionProps> = props => {
             return { width, height, item, rating }
         })
         .sort((a, b) => b.rating - a.rating)
-        .map(({ item, width, height }) => <GridCell width={width} height={height}><GridItem {...item} /></GridCell>)
+        .map(({ item, width, height }, index) => <GridCell key={index} width={width} height={height}><GridItem {...item} /></GridCell>)
 
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
