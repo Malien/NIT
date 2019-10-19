@@ -177,6 +177,9 @@ export const GridItem: React.FC<StoreItem> = props => {
             .bottom {
                 margin: 10px 0;
             }
+            .nostock {
+                margin: 10px;
+            }
         `}</style>
         <div className="container" ref={contentRef}>
             <div className="scroll" ref={scrollRef}>
@@ -188,7 +191,9 @@ export const GridItem: React.FC<StoreItem> = props => {
                         <div className="price">
                             {props.prevPrice && <span className="prev">{props.prevPrice}</span>}
                             <span className="cur">{props.price}</span>
-                            {props.outOfStock ? "Out of stock" : <button>Add to cart</button>}
+                            {props.outOfStock 
+                                ? <span className="nostock">Out of stock</span> 
+                                : <button>Add to cart</button>}
                         </div>
                     </div>
                 </div>

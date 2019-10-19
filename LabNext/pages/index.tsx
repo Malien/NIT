@@ -33,7 +33,8 @@ let items: StoreItem[] = [
         id:"id",
         previews:["static/SVG/category-1.svg"],
         tags:[],
-        price:39.99,
+        price:24.99,
+        prevPrice: 34.99,
         rating:3,
         outOfStock: true
     },

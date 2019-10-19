@@ -4,7 +4,7 @@ import { AdaptiveGrid, GridCell } from "./layout"
 import { GridItem } from "./grid-item"
 import { ThemeContext, LookContext } from "./style"
 
-const maxRating = 2.5
+const maxRating = 3.5
 const maxWidth = 3
 const maxHeight = 2
 
@@ -29,7 +29,7 @@ export const Section: React.FC<SectionProps> = props => {
             }
             return { width, height, item, rating }
         })
-        .sort((a, b) => a.rating - b.rating)
+        .sort((a, b) => b.rating - a.rating)
         .map(({ item, width, height }) => <GridCell width={width} height={height}><GridItem {...item} /></GridCell>)
 
     let theme = useContext(ThemeContext)
@@ -52,63 +52,6 @@ export const Section: React.FC<SectionProps> = props => {
                 {props.title && <span>{props.title}</span>}
                 <AdaptiveGrid columnWidth={300} rowHeight={300} responsive>
                     {items}
-                    {/* <GridCell width={3} height={2}>
-                        <GridItem
-                            name="Light night blouse"
-                            descripton={desc}
-                            id="id"
-                            previews={["static/SVG/category-1.svg"]}
-                            tags={[]}
-                            price={39.99}
-                            prevPrice={59.99}
-                            rating={3}
-                        />
-                    </GridCell>
-                    <GridCell width={2} height={1}>
-                        <GridItem
-                            name="Light night blouse"
-                            descripton={desc}
-                            id="id"
-                            previews={["static/SVG/category-1.svg"]}
-                            tags={[]}
-                            price={39.99}
-                            prevPrice={34.78}
-                            rating={3}
-                        />
-                    </GridCell>
-                    <GridCell width={1} height={1}>
-                        <GridItem
-                            name="Light night blouse"
-                            descripton={desc}
-                            id="id"
-                            previews={["static/SVG/category-1.svg"]}
-                            tags={[]}
-                            price={39.99}
-                            rating={3}
-                        />
-                    </GridCell>
-                    <GridCell width={1} height={1}>
-                        <GridItem
-                            name="Light night blouse"
-                            descripton={desc}
-                            id="id"
-                            previews={["static/SVG/category-1.svg"]}
-                            tags={[]}
-                            price={39.99}
-                            rating={3}
-                        />
-                    </GridCell>
-                    <GridCell width={2} height={1}>
-                        <GridItem
-                            name="Light night blouse"
-                            descripton={desc}
-                            id="id"
-                            previews={["static/SVG/category-1.svg"]}
-                            tags={[]}
-                            price={39.99}
-                            rating={3}
-                        />
-                    </GridCell> */}
                 </AdaptiveGrid>
             </div>
         </div>
