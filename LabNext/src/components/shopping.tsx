@@ -1,17 +1,72 @@
-import React, { useState, useRef, useEffect, useContext } from "react"
+import React, { useState, useRef, useEffect, useContext, createContext, Reducer, FC } from "react"
 import { StoreItem } from "../shared/components"
 import { useCancel } from "./hooks"
 import { ThemeContext, LookContext } from "./style"
 import { ThumbList, VSpaced } from "./layout"
 import { defaultImage } from "./common"
+import { toCountNumber } from "../util/numbers"
 
-interface ShoppingCartProps {
-    items: { item: StoreItem, count: number }[]
+export const SHOPPING_CART_VERSION = 1
+
+export const ShoppingCartContext = createContext<React.Dispatch<SCAction> | null>(null)
+
+export const SCReducer: Reducer<SCProps, SCAction> = (state, action) => {
+    const getIndex = () => {
+        let index = (typeof action.id == "number") ? action.id : state.items.findIndex(item => item.id === action.id)
+        if (index == -1) {
+            if (action.fallbackItem) {
+                index = state.items.length
+                state.items.push({...action.fallbackItem, count: 0})
+            } else {
+                console.warn("Tried to change count of non-existant item in shopping cart, and not provided fallback item. Skipping state update")
+            }
+        }
+        return index
+    }
+
+    switch (action.type) {
+        case SCActionType.set:
+            state.items[getIndex()].count = (action.count) ? action.count : 0
+            return { items: state.items }
+        case SCActionType.add:
+            state.items[getIndex()].count += (action.count) ? action.count : 0
+            return { items: state.items }
+        case SCActionType.submit:
+            if (typeof action.count !== "undefined") {
+                state.items[getIndex()].count = action.count
+            }
+            return { items: state.items.filter(item => item.count > 0) }
+        case SCActionType.reset:
+            if (action.resetState) return {items: action.resetState}
+            else {
+                console.warn("Tried to reset state, but `resetState` parameter was not provided. Skipping state update")
+                return state
+            }
+    }
 }
-export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
+
+export enum SCActionType {
+    add, set, submit, reset
+}
+export interface SCAction {
+    type: SCActionType;
+    id?: number | string;
+    count?: number;
+    fallbackItem?: StoreItem;
+    resetState?: SCItem[];
+}
+export interface SCItem extends StoreItem {
+    count: number;
+}
+export interface SCProps {
+    items: SCItem[];
+}
+export const ShoppingCart: React.FC<SCProps> = props => {
     let [shown, setShown] = useState(false)
+    let surfaced = props.items.length != 0 || shown
     let ref = useRef<HTMLDivElement>(null)
 
+    let dispatch = useContext(ShoppingCartContext)
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
 
@@ -31,7 +86,18 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
         }
     })
 
-    let items = props.items.map(({ item, count }, index) => <ShoppingCartItem key={index} count={count} {...item} />)
+    let titems = Object.values(props.items).map((item, index) =>
+        <ShoppingCartItem
+            key={index}
+            count={item.count}
+            onChange={count => {
+                if (dispatch) dispatch({ id: index, count, type: SCActionType.set })
+            }}
+            onSubmit={count => {
+                if (dispatch) dispatch({ id: index, count, type: SCActionType.submit })
+            }}
+            {...item}
+        />)
 
     return <>
         <style jsx>{`
@@ -43,19 +109,24 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
                 bottom: 0;
                 right: 0;
                 border-radius: 20px;
-                overflow-y: auto;
                 background-color: ${theme.headerColor};
                 box-shadow: ${theme.shadowColor} 3px 3px 20px 3px;
                 z-index: 20;
+                overflow: hidden;
+                transform: translateY(100px);
                 /* Yeah, I know I shouldn't animate width and height for performance reasons, yet still */
                 transition: width 0.2s 0s ease-in, 
                             height 0.2s 0s ease-in,
-                            border 0.2s 0s ease-in;
+                            border 0.2s 0s ease-in,
+                            transform 0.4s 1s cubic-bezier(0,0,.26,1.55);
             }
             .container.hidden {
                 width: 80px;
                 height: 80px;
                 border-radius: 40px;
+            }
+            .container.surfaced {
+                transform: translateY(0);
             }
             img {
                 filter: invert();
@@ -78,20 +149,14 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
                 height: 1px;
                 background-color: ${theme.alternateTextSubcolor};
             }
-            header {
-                background-color: ${theme.headerColor};
-                width: 100%;
-            }
             .items {
-                display: flex;
-                justify-content: center;
-                flex-direction: column;
                 width: 100%;
                 height: 419px;
                 overflow-y: scroll;
                 background-color: ${theme.backgroundColor};
             }
             button {
+                outline: 0;
                 right: 0;
                 bottom: 0;
                 appearance: none;
@@ -108,6 +173,9 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
             button:active {
                 background-color: ${theme.alternativeSubcolor};
             }
+            button:disabled {
+                background-color: ${theme.disabledColor};
+            }
             .spacer {
                 margin: ${look.smallSize + 60}px;
             }
@@ -116,6 +184,8 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
                 color: ${theme.textColor};
                 font-family: ${look.font};
                 font-size: ${look.mediumSize}px;
+                width: 100%;
+                text-align: center;
             }
             .column.hidden {
                 opacity: 0;
@@ -125,33 +195,25 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
                 opacity: 1;
                 transition: opacity 0.2s 0.1s ease-in;
             }
+            .header-spacer {
+                margin-top: 0px;
+            }
+
         `}</style>
-        <div ref={ref} className={"container" + ((shown) ? "" : " hidden")}>
+        <div ref={ref} className={"container" + ((shown) ? "" : " hidden") + ((surfaced) ? " surfaced" : "")}>
             <img alt="Shopping cart" src="static/SVG/cart.svg" />
-            {/* {shown && <div className="column">
-                <span className="title">Shopping cart</span>
-                <div className="divider" />
-                <div className="items">
-                    {items.length == 0 
-                        ? <span className="noitems">No items in the cart</span>
-                        : <ThumbList columns={4} thumbSize="40px">
-                            {items}
-                        </ThumbList>}
-                    <div className="spacer" />
-                </div>
-                <button>Proceed to checkout</button>
-            </div>} */}
             <div className={"column" + ((shown) ? "" : " hidden")}>
                 <span className="title">Shopping cart</span>
                 <div className="divider" />
                 <div className="items">
-                    {items.length == 0
-                        ? <span className="noitems">No items in the cart</span>
+                    <div className="header-spacer" />
+                    {titems.length == 0
+                        ? <div className="noitems">No items in the cart</div>
                         : <ThumbList notop columns={4} thumbSize="80px">
-                            {items}
+                            {titems}
                         </ThumbList>}
                     <VSpaced style={{ bottom: 0, right: 0 }}>
-                        <button>Proceed to checkout</button>
+                        <button disabled={titems.length == 0}>Proceed to checkout</button>
                     </VSpaced>
                 </div>
             </div>
@@ -161,10 +223,25 @@ export const ShoppingCart: React.FC<ShoppingCartProps> = props => {
 
 interface ShoppingCartItemProps extends StoreItem {
     count: number;
+    onChange: (val: number) => void;
+    onSubmit: (val?: number) => void;
 }
 export const ShoppingCartItem: React.FC<ShoppingCartItemProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
+    let [selected, setSelected] = useState(false)
+
+
+    useEffect(() => {
+        if (selected) {
+            const f = (event: KeyboardEvent) => {
+                if (event.key == "Enter") props.onSubmit()
+            }
+            document.addEventListener("keypress", f)
+            return () => document.removeEventListener("keypress", f)
+        }
+    }, [selected])
+
     return <>
         <style jsx>{`
             img {
@@ -187,7 +264,7 @@ export const ShoppingCartItem: React.FC<ShoppingCartItemProps> = props => {
                 grid-column: 3;
                 appearance: none;
                 border: none;
-                background-color: ${theme.footerColor};
+                background-color: ${theme.subbackgroundColor};
                 height: 1em;
                 padding: 10px;
                 width: 30px;
@@ -204,40 +281,99 @@ export const ShoppingCartItem: React.FC<ShoppingCartItemProps> = props => {
                 -webkit-appearance: none;
                 margin: 0; 
             }
-            div {
-                grid-column: 4;
-                width: 35px;
-                height: 35px;
-                background-color: #d13939;
-                border-radius: 17.5px;
-                align-self: center;
-                margin: 10px;
-                position: relative;
-            }
-            div::before {
-                width: 20px;
-                height: 4px;
-                border-radius: 2px;
-                background-color: white;
-                position: absolute;
-                content: "";
-                display: block;
-                transform: translate(7.5px, 16px) rotate(45deg);
-            }
-            div::after {
-                width: 20px;
-                height: 4px;
-                border-radius: 2px;
-                background-color: white;
-                position: absolute;
-                content: "";
-                display: block;
-                transform: translate(7.5px, 16px) rotate(-45deg);
-            }
         `}</style>
         <img alt={props.name + " image"} src={(props.previews[0]) ? props.previews[0] : defaultImage} />
         <span>{props.name}</span>
-        <input type="number" value={props.count} />
-        <div />
+        <input
+            min={0}
+            type="number"
+            value={String(props.count)}
+            onBlur={() => {
+                setSelected(false)
+                props.onSubmit()
+            }}
+            onChange={(event) => props.onChange(toCountNumber(event.target.value))}
+            onFocus={() => {
+                setSelected(true)
+            }}
+        />
+        <CancelButton onClick={() => {
+            props.onSubmit(0)
+        }} />
+    </>
+}
+
+interface CancelButtonProps {
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+}
+
+export const CancelButton: FC<CancelButtonProps> = props => {
+    let theme = useContext(ThemeContext)
+    return <>
+        <style jsx>{`
+        button {
+            outline: 0;
+            text-align: start;
+            appearance: none;
+            border: none;
+            display: block;
+            padding: 0;
+            grid-column: 4;
+            width: 35px;
+            height: 35px;
+            border-radius: 17.5px;
+            align-self: center;
+            margin: 10px;
+            position: relative;
+            background-color: #dd4242;
+        }
+        button::before {
+            opacity: 0;
+            background-color: #c73434;
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            content: "";
+            display: block;
+            transition: opacity 0.1s 0s ease-in;
+        }
+        button:active::before {
+            opacity: 1;
+        }
+        button::after {
+            position: absolute;
+            top:0;
+            border-radius: 50%;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            content: "";
+            display: block;
+            box-shadow: ${theme.shadowColor} 0px 0px 10px 3px;
+            transition: opacity 0.2s 0s ease-in;
+        }
+        button:hover::after {
+            opacity: 1;
+        }
+        .arrow {
+            pointer-events: none;
+            width: 20px;
+            height: 4px;
+            top: 0;
+            border-radius: 2px;
+            background-color: white;
+            position: absolute;
+        }
+        .left {
+            transform: translate(7.5px, 16px) rotate(45deg);
+        }
+        .right {
+            transform: translate(7.5px, 16px) rotate(-45deg);
+        }
+        `}</style>
+        <button onClick={props.onClick}>
+            <div className="arrow left" />
+            <div className="arrow right" />
+        </button>
     </>
 }

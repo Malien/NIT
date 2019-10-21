@@ -1,8 +1,11 @@
-import React, { useContext, useState, useEffect, useRef } from "react"
+import React, { useContext, useState, useEffect, useReducer } from "react"
 import Link from "next/link"
 
 import { ThemeContext, LookContext, Light, Dark } from "./style";
 import { VSpaced } from "./layout";
+import { StoreItem } from "../shared/components";
+import { Section, SectionProps } from "./section";
+import { ShoppingCartContext, ShoppingCart, SCActionType, SHOPPING_CART_VERSION, SCReducer } from "./shopping";
 
 //TODO: provide default image for product
 export const defaultImage = "";
@@ -193,11 +196,53 @@ export const AppFrame: React.FC = props => {
                 <Sidebar />
                 <div className="content">
                     {props.children}
-                    <VSpaced style={{ bottom: 0, width: "100%"}}>
+                    <VSpaced style={{ bottom: 0, width: "100%" }}>
                         <Footer />
                     </VSpaced>
                 </div>
             </div>
         </ThemeContext.Provider>
     </>
+}
+
+interface StorefrontProps {
+    sections?: SectionProps[];
+    items?: StoreItem[];
+}
+export const Storefront: React.FC<StorefrontProps> = props => {
+    let [shoppingCartItems, dispatch] = useReducer(SCReducer, {items: []})
+    
+    useEffect(() => {
+        let version = localStorage.getItem("cart_version")
+        if (!version || ! (version == SHOPPING_CART_VERSION as any))  {
+            localStorage.setItem("cart", JSON.stringify({items: []}))
+            localStorage.setItem("cart_version", String(SHOPPING_CART_VERSION))
+        } else {
+            let cart = localStorage.getItem("cart")
+            try {
+                if (cart) dispatch({type: SCActionType.reset, resetState: JSON.parse(cart)})
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }, [])
+    
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(shoppingCartItems.items))
+    }, [shoppingCartItems])
+
+    let sections: JSX.Element[] = []
+    const buyHandler = (item: StoreItem) => {
+        dispatch({ type: SCActionType.add, id: item.id, count: 1, fallbackItem:item })
+    }
+    if (props.items) {
+        sections.push(<Section items={props.items} key={-1} onBuy={buyHandler}/>)
+    }
+    if (props.sections) {
+        sections.push(...props.sections.map((props, index) => <Section {...props} key={index} onBuy={buyHandler} />))
+    }
+    return <ShoppingCartContext.Provider value={dispatch}>
+        {sections}
+        <ShoppingCart {...shoppingCartItems} />
+    </ShoppingCartContext.Provider>
 }

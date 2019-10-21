@@ -8,9 +8,10 @@ const maxRating = 3.5
 const maxWidth = 3
 const maxHeight = 2
 
-interface SectionProps {
+export interface SectionProps {
     title?: string;
     items: StoreItem[];
+    onBuy?: (item: StoreItem) => void;
 }
 
 export const Section: React.FC<SectionProps> = props => {
@@ -30,7 +31,10 @@ export const Section: React.FC<SectionProps> = props => {
             return { width, height, item, rating }
         })
         .sort((a, b) => b.rating - a.rating)
-        .map(({ item, width, height }, index) => <GridCell key={index} width={width} height={height}><GridItem {...item} /></GridCell>)
+        .map(({ item, width, height }, index) => 
+            <GridCell key={index} width={width} height={height}>
+                <GridItem {...item} onBuy={() => {if (props.onBuy) props.onBuy(item)}}/>
+            </GridCell>)
 
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)

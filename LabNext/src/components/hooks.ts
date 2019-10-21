@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react"
 import ResizeObserver from "resize-observer-polyfill"
 
-// const ResizeObserver = ((window as any).ResizeObserver || Pollyfil) as Pollyfil
-
 export interface Bounds {
     width: number;
     height: number;

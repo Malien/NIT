@@ -39,8 +39,12 @@ export const StarRating: React.FC<StarRatingProps> = props => {
     </>
 }
 
-export const GridItem: React.FC<StoreItem> = props => {
-    let [curImg, setCurImg] = useState(props.previews[0])
+interface GridItemProps extends StoreItem {
+    onBuy?: () => void;
+}
+
+export const GridItem: React.FC<GridItemProps> = props => {
+    // let [curImg, setCurImg] = useState(props.previews[0])
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
 
@@ -70,7 +74,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                 width: calc(100% - 20px);
                 height: calc(100% - 20px);
                 position: relative;
-                background-image: url("${curImg}");
+                /*background-image: url("${props.previews[0]}");*/
                 ${props.outOfStock ? "filter: saturate(50%);" : ""}
                 background-size: cover;
                 background-position: center center;
@@ -79,9 +83,16 @@ export const GridItem: React.FC<StoreItem> = props => {
                 box-shadow: ${theme.shadowColor} 3px 3px 20px 3px;
                 overflow: hidden;
             }
+            img {
+                width: 100%;
+                padding-bottom: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
             .scroll {
                 height: 100%;
-                overflow: scroll;
+                overflow-y: ${hovered ? "scroll" : "hidden"};
                 transition: transform 0.4s 0s ease-in-out;
                 transform: translateY(${contentHeight - nameHeight}px);
             }
@@ -101,6 +112,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                 font-family: ${look.strongFont};
                 line-height: ${look.stringLineHeight * 100}%;
                 font-size: ${(contentWidth > 350) ? look.extraLarge : (look.largeSize + look.extraLarge) /2 }px;
+                text-shadow: ${theme.shadowColor} 0px 0px 10px 1px
             }
             .desc {
                 /* font-family: ${look.font} */
@@ -189,6 +201,7 @@ export const GridItem: React.FC<StoreItem> = props => {
             }
         `}</style>
         <div className="container" ref={contentRef}>
+            <img src={props.previews[0]} alt="Product image" />
             <div className="scroll" ref={scrollRef}>
                 <div className="info" ref={infoRef}>
                     <span className="title" ref={nameRef}>{name1}<br />{name2}</span>
@@ -198,7 +211,7 @@ export const GridItem: React.FC<StoreItem> = props => {
                         <div className="price">
                             {props.prevPrice && <span className="prev">{props.prevPrice}</span>}
                             <span className="cur">{props.price}</span>
-                            <button disabled={props.outOfStock}>{props.outOfStock ? "Out of stock" : "Add to cart"}</button>
+                            <button disabled={props.outOfStock} onClick={props.onBuy}>{props.outOfStock ? "Out of stock" : "Add to cart"}</button>
                         </div>
                     </div>
                 </div>

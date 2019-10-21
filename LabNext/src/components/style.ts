@@ -12,6 +12,7 @@ export interface Theme {
     alternateTextSubcolor: string;
     footerColor: string;
     backgroundColor: string;
+    subbackgroundColor: string;
     shadowColor: string;
     alternativeColor: string;
     alternativeSubcolor: string;
@@ -40,6 +41,7 @@ export const Light: Theme = {
     alternateTextSubcolor: "#d6d6d6",
     footerColor: "#707070",
     backgroundColor: "#fff",
+    subbackgroundColor: "#eee",
     shadowColor: "#00000044",
     alternativeColor: "#aa00aa",
     alternativeSubcolor: "purple",
@@ -56,6 +58,7 @@ export const Dark: Theme = {
     alternateTextColor: "#fff",
     alternateTextSubcolor: "#d6d6d6",
     backgroundColor: "#293045",
+    subbackgroundColor: "#091C32",
     shadowColor: "#00000088",
     alternativeColor: "#aa00aa",
     alternativeSubcolor: "purple",
