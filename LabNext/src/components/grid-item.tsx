@@ -75,7 +75,6 @@ export const GridItem: React.FC<GridItemProps> = props => {
                 height: calc(100% - 20px);
                 position: relative;
                 /*background-image: url("${props.previews[0]}");*/
-                ${props.outOfStock ? "filter: saturate(50%);" : ""}
                 background-size: cover;
                 background-position: center center;
                 margin: 10px;
@@ -84,6 +83,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
                 overflow: hidden;
             }
             img {
+                ${props.outOfStock ? "filter: saturate(50%);" : ""}
                 width: 100%;
                 padding-bottom: 100%;
                 position: absolute;
@@ -117,6 +117,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
             .desc {
                 /* font-family: ${look.font} */
                 font-size: ${look.smallSize}px;
+                /*color: ${theme.textSubcolor};*/
             }
             .price {
                 display: flex;
@@ -133,6 +134,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
                 color: ${theme.textSubcolor};
             }
             button {
+                outline: 0;
                 appearance: none;
                 position: relative;
                 height: 2em;

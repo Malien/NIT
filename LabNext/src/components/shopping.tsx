@@ -113,7 +113,7 @@ export const ShoppingCart: React.FC<SCProps> = props => {
                 box-shadow: ${theme.shadowColor} 3px 3px 20px 3px;
                 z-index: 20;
                 overflow: hidden;
-                transform: translateY(100px);
+                transform: translateY(calc(80px + 5vh));
                 /* Yeah, I know I shouldn't animate width and height for performance reasons, yet still */
                 transition: width 0.2s 0s ease-in, 
                             height 0.2s 0s ease-in,

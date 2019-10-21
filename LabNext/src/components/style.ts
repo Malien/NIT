@@ -66,7 +66,7 @@ export const Dark: Theme = {
 }
 
 export const Vanila: Look = {
-    font: "'Helvetica Neue', sans-serif",
+    font: "'Helvetica Neue', 'Helvetica', sans-serif",
     strongFont: "'Libre Baskerville', cursive",
     stringLineHeight: 1,
     extraLarge: 72,
