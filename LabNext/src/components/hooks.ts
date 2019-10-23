@@ -82,3 +82,13 @@ export function useHover<T extends HTMLElement>(ref: React.RefObject<T>) {
     }, [ref])
     return hovered
 }
+
+export function useClick<T extends HTMLElement>(ref: React.RefObject<T>, cb: (event: MouseEvent) => void, deps: any[] = []) {
+    useEffect(() => {
+        let obj = ref.current
+        if(obj) {
+            obj.addEventListener("click", cb)
+            return () => {if (obj) obj.removeEventListener("click", cb)}
+        }
+    }, [ref, ...deps])
+}

@@ -47,7 +47,7 @@ export const NavLink: React.FC<NavLinkProps> = props => {
     </>
 }
 
-export const Sidebar: React.FC = props => {
+export const Sidebar: React.FC<{path?: string}> = props => {
     let theme = useContext(ThemeContext)
     return <>
         <style jsx>{`
@@ -61,6 +61,7 @@ export const Sidebar: React.FC = props => {
                 width: 250px;
                 height: 100vh;
                 background-color: ${theme.headerColor};
+                box-shadow: ${theme.shadowColor} 5px 0px 8px;
             }
             img {
                 margin: 5%;
@@ -71,11 +72,12 @@ export const Sidebar: React.FC = props => {
             }
         `}</style>
         <header>
-            <img src="static/SVG/White-logo.svg" className="logo" alt="Shop logo" />
+            <img src="static/assets/SVG/White-logo.svg" className="logo" alt="Shop logo" />
             <div className="navigation">
-                <NavLink selected thumb="" label="label" href="/" />
-                <NavLink thumb="" label="label2" href="/" />
-                <NavLink thumb="" label="label4" href="/" />
+                <NavLink selected={props.path == "/"} thumb="" label="All Items" href="/" />
+                <NavLink selected={props.path == "/accessories"} thumb="" label="Hats" href="/accessories" />
+                <NavLink selected={props.path == "/tops"} thumb="" label="Tops" href="/tops" />
+                <NavLink selected={props.path == "/leggins"} thumb="" label="Leggins" href="/leggins" />
             </div>
         </header>
         <div className="spacer" />
@@ -133,7 +135,7 @@ export const Footer: React.FC = props => {
             }
         `}</style>
         <footer>
-            <img src="static/SVG/White-logo.svg" className="logo" alt="Shop logo" />
+            <img src="static/assets/SVG/White-logo.svg" className="logo" alt="Shop logo" />
             <div className="footer-textbox">
                 <span className="text-thin">Designed and developed by</span>
                 <span className="text-bold">Petryk Yaroslav</span>
@@ -153,7 +155,7 @@ export const Footer: React.FC = props => {
     </>
 }
 
-export const AppFrame: React.FC = props => {
+export const AppFrame: React.FC<{path?: string}> = props => {
     let [theme, setTheme] = useState(Light)
 
     useEffect(() => {
@@ -193,7 +195,7 @@ export const AppFrame: React.FC = props => {
                 }
             `}</style>
             <div className="app">
-                <Sidebar />
+                <Sidebar path={props.path} />
                 <div className="content">
                     {props.children}
                     <VSpaced style={{ bottom: 0, width: "100%" }}>
@@ -210,33 +212,33 @@ interface StorefrontProps {
     items?: StoreItem[];
 }
 export const Storefront: React.FC<StorefrontProps> = props => {
-    let [shoppingCartItems, dispatch] = useReducer(SCReducer, {items: []})
-    
+    let [shoppingCartItems, dispatch] = useReducer(SCReducer, { shown: false, items: [] })
+
     useEffect(() => {
         let version = localStorage.getItem("cart_version")
-        if (!version || ! (version == SHOPPING_CART_VERSION as any))  {
-            localStorage.setItem("cart", JSON.stringify({items: []}))
+        if (!version || !(version == SHOPPING_CART_VERSION as any)) {
+            localStorage.setItem("cart", JSON.stringify({ items: [] }))
             localStorage.setItem("cart_version", String(SHOPPING_CART_VERSION))
         } else {
             let cart = localStorage.getItem("cart")
             try {
-                if (cart) dispatch({type: SCActionType.reset, resetState: JSON.parse(cart)})
+                if (cart) dispatch({ type: SCActionType.reset, resetState: JSON.parse(cart) })
             } catch (e) {
                 console.error(e)
             }
         }
     }, [])
-    
+
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(shoppingCartItems.items))
     }, [shoppingCartItems])
 
     let sections: JSX.Element[] = []
     const buyHandler = (item: StoreItem) => {
-        dispatch({ type: SCActionType.add, id: item.id, count: 1, fallbackItem:item })
+        dispatch({ type: SCActionType.add, id: item.id, count: 1, fallbackItem: item })
     }
     if (props.items) {
-        sections.push(<Section items={props.items} key={-1} onBuy={buyHandler}/>)
+        sections.push(<Section items={props.items} key={-1} onBuy={buyHandler} />)
     }
     if (props.sections) {
         sections.push(...props.sections.map((props, index) => <Section {...props} key={index} onBuy={buyHandler} />))

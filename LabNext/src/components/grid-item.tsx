@@ -15,18 +15,29 @@ function splitName(name: string): [string, string] {
     return [words.slice(0, pivot).join(), words.slice(pivot).join(" ")]
 }
 
+const MAX_RATING = 5
 interface StarRatingProps {
     rating: number;
 }
 export const StarRating: React.FC<StarRatingProps> = props => {
     let out: JSX.Element[] = []
-    for (let i=0; i<props.rating; ++i) {
+    let i
+    for (i=0; i<props.rating; ++i) {
         out.push(<div key={i} style={{
             width: "20px",
             height: "20px",
             borderRadius: "5px",
             margin: "5px",
             backgroundColor: "yellow"
+        }} />)
+    }
+    for (;i<MAX_RATING; ++i) {
+        out.push(<div key={i} style={{
+            width: "20px",
+            height: "20px",
+            borderRadius: "5px",
+            margin: "5px",
+            backgroundColor: "gray"
         }} />)
     }
     return <>
@@ -207,12 +218,12 @@ export const GridItem: React.FC<GridItemProps> = props => {
             <div className="scroll" ref={scrollRef}>
                 <div className="info" ref={infoRef}>
                     <span className="title" ref={nameRef}>{name1}<br />{name2}</span>
-                    <span className="desc">{props.descripton}</span>
+                    <span className="desc">{props.description}</span>
                     <div className="bottom">
                         <StarRating rating={props.rating} />
                         <div className="price">
-                            {props.prevPrice && <span className="prev">{props.prevPrice}</span>}
-                            <span className="cur">{props.price}</span>
+                            {props.prevPrice && <span className="prev">${props.prevPrice}</span>}
+                            <span className="cur">${props.price}</span>
                             <button disabled={props.outOfStock} onClick={props.onBuy}>{props.outOfStock ? "Out of stock" : "Add to cart"}</button>
                         </div>
                     </div>

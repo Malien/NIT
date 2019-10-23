@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext, createContext, Reducer, FC } from "react"
 import { StoreItem } from "../shared/components"
-import { useCancel } from "./hooks"
+import { useClick } from "./hooks"
 import { ThemeContext, LookContext } from "./style"
 import { ThumbList, VSpaced } from "./layout"
 import { defaultImage } from "./common"
@@ -16,7 +16,7 @@ export const SCReducer: Reducer<SCProps, SCAction> = (state, action) => {
         if (index == -1) {
             if (action.fallbackItem) {
                 index = state.items.length
-                state.items.push({...action.fallbackItem, count: 0})
+                state.items.push({ ...action.fallbackItem, count: 0 })
             } else {
                 console.warn("Tried to change count of non-existant item in shopping cart, and not provided fallback item. Skipping state update")
             }
@@ -27,26 +27,28 @@ export const SCReducer: Reducer<SCProps, SCAction> = (state, action) => {
     switch (action.type) {
         case SCActionType.set:
             state.items[getIndex()].count = (action.count) ? action.count : 0
-            return { items: state.items }
+            return { ...state, items: state.items }
         case SCActionType.add:
             state.items[getIndex()].count += (action.count) ? action.count : 0
-            return { items: state.items }
+            return { ...state, items: state.items }
         case SCActionType.submit:
             if (typeof action.count !== "undefined") {
                 state.items[getIndex()].count = action.count
             }
-            return { items: state.items.filter(item => item.count > 0) }
+            return { ...state, items: state.items.filter(item => item.count > 0) }
         case SCActionType.reset:
-            if (action.resetState) return {items: action.resetState}
+            if (action.resetState) return { ...state, items: action.resetState }
             else {
                 console.warn("Tried to reset state, but `resetState` parameter was not provided. Skipping state update")
                 return state
             }
+        case SCActionType.toggle:
+            return { ...state, shown: !state.shown }
     }
 }
 
 export enum SCActionType {
-    add, set, submit, reset
+    add, set, submit, reset, toggle
 }
 export interface SCAction {
     type: SCActionType;
@@ -60,23 +62,23 @@ export interface SCItem extends StoreItem {
 }
 export interface SCProps {
     items: SCItem[];
+    shown: boolean;
 }
 export const ShoppingCart: React.FC<SCProps> = props => {
-    let [shown, setShown] = useState(false)
-    let surfaced = props.items.length != 0 || shown
     let ref = useRef<HTMLDivElement>(null)
+    let dimmerRef = useRef<HTMLDivElement>(null)
 
     let dispatch = useContext(ShoppingCartContext)
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
 
-    useCancel(ref, () => {
-        if (shown) setShown(false)
-    }, [shown])
+    useClick(dimmerRef, () => {
+        if (props.shown) if (dispatch) dispatch({ type: SCActionType.toggle })
+    }, [props.shown])
     useEffect(() => {
         let el = ref.current
         const func = () => {
-            if (!shown) setShown(true)
+            if (!props.shown) if (dispatch) dispatch({ type: SCActionType.toggle })
         }
         if (el) {
             el.addEventListener("click", func)
@@ -86,6 +88,9 @@ export const ShoppingCart: React.FC<SCProps> = props => {
         }
     })
 
+    let surfaced = props.items.length != 0 || props.shown
+    let totalCost = props.items.reduce((sum, item) => sum + item.count * item.price, 0)
+    let buyable = props.items.length != 0 && !props.items.reduce((acc, now) => acc || now.outOfStock, false) && totalCost != 0
     let titems = Object.values(props.items).map((item, index) =>
         <ShoppingCartItem
             key={index}
@@ -198,23 +203,52 @@ export const ShoppingCart: React.FC<SCProps> = props => {
             .header-spacer {
                 margin-top: 0px;
             }
-
+            .total {
+                font-family: ${look.font};
+                font-size: ${look.mediumSize}px;
+                color: ${theme.textSubcolor};
+                width: 100%;
+                margin: 20px 0;
+                text-align: center;
+            }
+            .total.disabled {
+                color: ${theme.disabledColor};
+            }
+            .dimmer {
+                position: fixed;
+                width: 100vw;
+                height: 100vh;
+                background-color: ${theme.dimmingColor};
+                opacity: 1;
+                top: 0;
+                left: 0;
+                transition: opacity 0.2s 0s ease-in;
+            }
+            .dimmer.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
         `}</style>
-        <div ref={ref} className={"container" + ((shown) ? "" : " hidden") + ((surfaced) ? " surfaced" : "")}>
-            <img alt="Shopping cart" src="static/SVG/cart.svg" />
-            <div className={"column" + ((shown) ? "" : " hidden")}>
+        <div ref={dimmerRef} className={"dimmer" + (props.shown ? "" : " hidden")} />
+        <div ref={ref} className={"container" + ((props.shown) ? "" : " hidden") + ((surfaced) ? " surfaced" : "")}>
+            <img alt="Shopping cart" src="static/assets/SVG/cart.svg" />
+            <div className={"column" + ((props.shown) ? "" : " hidden")}>
                 <span className="title">Shopping cart</span>
                 <div className="divider" />
                 <div className="items">
                     <div className="header-spacer" />
                     {titems.length == 0
                         ? <div className="noitems">No items in the cart</div>
-                        : <ThumbList notop columns={4} thumbSize="80px">
-                            {titems}
-                        </ThumbList>}
-                    <VSpaced style={{ bottom: 0, right: 0 }}>
-                        <button disabled={titems.length == 0}>Proceed to checkout</button>
-                    </VSpaced>
+                        : <>
+                            <ThumbList notop columns={4} thumbSize="80px">
+                                {titems}
+                            </ThumbList>
+                            <div className={"total" + (buyable ? "" : " disabled")}>Total: ${totalCost.toFixed(2)}</div>
+                            <VSpaced style={{ bottom: 0, right: 0 }}>
+                                <button disabled={!buyable}>Proceed to checkout</button>
+                            </VSpaced>
+                        </>
+                    }
                 </div>
             </div>
         </div>

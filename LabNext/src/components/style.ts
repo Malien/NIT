@@ -17,6 +17,7 @@ export interface Theme {
     alternativeColor: string;
     alternativeSubcolor: string;
     disabledColor: string;
+    dimmingColor: string;
 }
 
 export interface Look {
@@ -36,7 +37,7 @@ export const Light: Theme = {
     headerColor: "#3498db",
     headerSubcolor: "#5870D6",
     textColor: "#505050",
-    textSubcolor: "#5f5f5f",
+    textSubcolor: "#777",
     alternateTextColor: "#fff",
     alternateTextSubcolor: "#d6d6d6",
     footerColor: "#707070",
@@ -45,7 +46,8 @@ export const Light: Theme = {
     shadowColor: "#00000044",
     alternativeColor: "#aa00aa",
     alternativeSubcolor: "purple",
-    disabledColor: "#606060"
+    disabledColor: "#999",
+    dimmingColor: "#00000044"
 }
 
 export const Dark: Theme = {
@@ -62,7 +64,8 @@ export const Dark: Theme = {
     shadowColor: "#00000088",
     alternativeColor: "#aa00aa",
     alternativeSubcolor: "purple",
-    disabledColor: "#383838"
+    disabledColor: "#585858",
+    dimmingColor: "#00000088"
 }
 
 export const Vanila: Look = {

@@ -50,10 +50,20 @@ export const Section: React.FC<SectionProps> = props => {
                 font-family: ${look.font};
                 font-size: ${look.extraLarge}px;
             }
+            .divider {
+                margin: 40px 5% 20px;
+                height: 4px;
+                border-radius: 2px;
+                width: 90%;
+                background-color: ${theme.textSubcolor};
+            }
         `}</style>
         <div>
             <div className="container">
-                {props.title && <span>{props.title}</span>}
+                {props.title && <>
+                    <div className="divider"/>
+                    <span>{props.title}</span>
+                </>}
                 <AdaptiveGrid columnWidth={300} rowHeight={300} responsive>
                     {items}
                 </AdaptiveGrid>
