@@ -3,6 +3,7 @@ import { createContext } from "react";
 type kind = "dark" | "light"
 
 export interface Theme {
+    mobileHeaderColor: any;
     kind: kind;
     headerColor: string;
     headerSubcolor: string;
@@ -47,7 +48,8 @@ export const Light: Theme = {
     alternativeColor: "#aa00aa",
     alternativeSubcolor: "purple",
     disabledColor: "#999",
-    dimmingColor: "#00000044"
+    dimmingColor: "#00000044",
+    mobileHeaderColor: "#fff",
 }
 
 export const Dark: Theme = {
@@ -65,7 +67,8 @@ export const Dark: Theme = {
     alternativeColor: "#aa00aa",
     alternativeSubcolor: "purple",
     disabledColor: "#585858",
-    dimmingColor: "#00000088"
+    dimmingColor: "#00000088",
+    mobileHeaderColor: "#091C32",
 }
 
 export const Vanila: Look = {

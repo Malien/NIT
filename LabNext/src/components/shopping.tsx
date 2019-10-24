@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext, createContext, Reducer, FC } from "react"
 import { StoreItem } from "../shared/components"
-import { useClick } from "./hooks"
+import { useClick, useKeyDown } from "./hooks"
 import { ThemeContext, LookContext } from "./style"
 import { ThumbList, VSpaced } from "./layout"
 import { defaultImage } from "./common"
@@ -73,20 +73,14 @@ export const ShoppingCart: React.FC<SCProps> = props => {
     let look = useContext(LookContext)
 
     useClick(dimmerRef, () => {
-        if (props.shown) if (dispatch) dispatch({ type: SCActionType.toggle })
+        if (props.shown && dispatch) dispatch({ type: SCActionType.toggle })
     }, [props.shown])
-    useEffect(() => {
-        let el = ref.current
-        const func = () => {
-            if (!props.shown) if (dispatch) dispatch({ type: SCActionType.toggle })
-        }
-        if (el) {
-            el.addEventListener("click", func)
-        }
-        return () => {
-            if (el) el.removeEventListener("click", func)
-        }
-    })
+    useKeyDown((e) => {
+        if (props.shown && e.key == "Escape" && dispatch) dispatch({ type: SCActionType.toggle })
+    }, [props.shown])
+    useClick(ref, () => {
+        if (!props.shown && dispatch) dispatch({ type: SCActionType.toggle })
+    }, [props.shown])
 
     let surfaced = props.items.length != 0 || props.shown
     let totalCost = props.items.reduce((sum, item) => sum + item.count * item.price, 0)
@@ -116,7 +110,7 @@ export const ShoppingCart: React.FC<SCProps> = props => {
                 border-radius: 20px;
                 background-color: ${theme.headerColor};
                 box-shadow: ${theme.shadowColor} 3px 3px 20px 3px;
-                z-index: 20;
+                z-index: 40;
                 overflow: hidden;
                 transform: translateY(calc(80px + 5vh));
                 /* Yeah, I know I shouldn't animate width and height for performance reasons, yet still */
@@ -223,6 +217,7 @@ export const ShoppingCart: React.FC<SCProps> = props => {
                 top: 0;
                 left: 0;
                 transition: opacity 0.2s 0s ease-in;
+                z-index: 30;
             }
             .dimmer.hidden {
                 opacity: 0;

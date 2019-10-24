@@ -76,7 +76,6 @@ interface IndexPageProps {
 }
 
 const IndexPage: NextPage<IndexPageProps> = props => {
-    console.log(props.tops)
     return <AppFrame path="/">
         <Storefront items={items} sections={[
             {title: "Hats and Accessories", items: props.hats},

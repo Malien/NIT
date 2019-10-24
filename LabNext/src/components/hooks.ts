@@ -9,7 +9,7 @@ export interface Bounds {
 export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => void, deps: any[] = []) {
     useEffect(() => {
         document.addEventListener("keydown", listener)
-        return () => {document.removeEventListener("keydown", listener)}
+        return () => { document.removeEventListener("keydown", listener) }
     }, deps)
 }
 
@@ -18,7 +18,7 @@ export function useCancel<T extends HTMLElement>(ref: React.RefObject<T>, cb: ()
         const mfunc = (event: MouseEvent) => {
             let el = ref.current
             if (el
-                && event.target 
+                && event.target
                 && !el.contains(event.target as Node)
             ) cb()
         }
@@ -51,10 +51,10 @@ export function useResize<T extends HTMLElement>(ref: React.RefObject<T> | T, cb
 }
 
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaultVal: Bounds): Bounds;
-export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>): Bounds | undefined;
+export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>): OptionalBounds;
 
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaultVal?: Bounds) {
-    let [bounds, setBounds] = useState(defaultVal)
+    let [bounds, setBounds] = useState<Bounds | OptionalBounds>(defaultVal || {})
     useEffect(() => {
         let el = ref.current
         if (el) setBounds({ width: el.offsetWidth, height: el.offsetHeight })
@@ -86,9 +86,43 @@ export function useHover<T extends HTMLElement>(ref: React.RefObject<T>) {
 export function useClick<T extends HTMLElement>(ref: React.RefObject<T>, cb: (event: MouseEvent) => void, deps: any[] = []) {
     useEffect(() => {
         let obj = ref.current
-        if(obj) {
+        if (obj) {
             obj.addEventListener("click", cb)
-            return () => {if (obj) obj.removeEventListener("click", cb)}
+            return () => { if (obj) obj.removeEventListener("click", cb) }
         }
     }, [ref, ...deps])
+}
+
+const dscrollTrigger = 20
+export function useMobileScroll(initial: boolean = true, offsetShown: number = 0) {
+    let [shown, setShown] = useState(initial)
+    let prevScroll: number = (window) ? window.pageYOffset : 0
+    useEffect(() => {
+        const f = () => {
+            let dscroll = window.pageYOffset - prevScroll
+            prevScroll = window.pageYOffset
+            if ((dscroll < -dscrollTrigger && !shown) || window.pageYOffset < offsetShown) setShown(true)
+            else if (dscroll > dscrollTrigger && shown) setShown(false)
+        }
+        document.addEventListener("scroll", f)
+        return () => document.removeEventListener("scroll", f)
+    }, [shown])
+    return shown
+}
+
+interface OptionalBounds {
+    width?: number;
+    height?: number
+}
+export function useWindowBounds(deps: any[] = []) {
+    let [bounds, setBounds] = useState<OptionalBounds>({})
+    useEffect(() => {
+        setBounds({ width: window.innerWidth, height: window.innerHeight })
+        const f = () => {
+            setBounds({ width: window.innerWidth, height: window.innerHeight })
+        }
+        window.addEventListener("resize", f)
+        return () => window.removeEventListener("resize", f)
+    }, [...deps])
+    return bounds
 }

@@ -93,7 +93,6 @@ Dropdown.displayName = "Dropdown"
 interface VSpacedProps {
     style: React.CSSProperties;
 }
-
 export const VSpaced: FunctionComponent<VSpacedProps> = props => {
     let elRef = useRef<HTMLDivElement>(null)
     let { height } = useBounds(elRef, { width: 0, height: 0 })
@@ -102,6 +101,24 @@ export const VSpaced: FunctionComponent<VSpacedProps> = props => {
         <style jsx>{`
             .spacer {
                 margin-top: ${height}px;
+            }
+        `}</style>
+        <div className="spacer" />
+        <div style={{ position: "absolute", ...props.style }} ref={elRef}>{props.children}</div>
+    </>
+}
+
+interface HSpacedProps {
+    style: React.CSSProperties;
+}
+export const HSpaced: FunctionComponent<HSpacedProps> = props => {
+    let elRef = useRef<HTMLDivElement>(null)
+    let { width } = useBounds(elRef, { width: 0, height: 0 })
+
+    return <>
+        <style jsx>{`
+            .spacer {
+                margin-left: ${width}px;
             }
         `}</style>
         <div className="spacer" />
@@ -188,5 +205,90 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
         <div className="grid" ref={gridRef}>
             {transformed}
         </div>
+    </>
+}
+
+interface ShadowedProps {
+    color: string;
+    dx?: string;
+    dy?: string;
+    animationFunc?: string;
+    spread?: string;
+    distance?: string;
+    duration?: string;
+    delay?: string;
+    shown?: boolean;
+}
+export const Shadowed: React.FC<ShadowedProps> = ({ color, children, dx = 0, dy = 0, animationFunc = "", spread = 0, distance = 0, duration = 0, delay = 0, shown = true }) => <>
+    <style jsx>{`
+        div::before {
+            content: "";
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            width: 0;
+            display: block;
+            box-shadow: ${color} ${dx} ${dy} ${spread} ${distance};
+            transition: opacity ${duration} ${delay} ${animationFunc};
+            opacity: ${shown ? 1 : 0};
+        }
+    `}</style>
+    <div>
+        {children}
+    </div>
+</>
+
+interface SlideoverPanelProps {
+    shown: boolean;
+    fixed: boolean;
+    onDismiss?: () => void;
+}
+export const SlideoverPanel: React.FC<SlideoverPanelProps> = props => {
+    let theme = useContext(ThemeContext)
+    let ref = useRef<HTMLDivElement>(null)
+    let dimmerRef = useRef<HTMLDivElement>(null)
+    useCancel(dimmerRef, () => {
+        if (props.shown && props.onDismiss) props.onDismiss()
+    }, [props.shown, props.onDismiss])
+    let { width } = useBounds(ref)
+
+    return <>
+        <style jsx>{`
+            .sheet {
+                transition: transform 0.2s 0s ease-in;
+                transform: translateX(${props.shown ? 0 : (width ? -width : 0)}px);
+            }
+            .fixed {
+                z-index: ${props.shown ? 30 : 30};
+                position: fixed;
+            }
+            .dimmer {
+                width: 100vw;
+                height: 100vh;
+                position: fixed;
+                background-color: ${theme.dimmingColor};
+                transition: opacity 0.2s 0s ease-in;
+                z-index: 20;
+                opacity: 1;
+            }
+            .dimmer.hidden {
+                z-index: 0;
+                opacity: 0;
+            }
+        `}</style>
+        <div ref={dimmerRef} className={"dimmer" + (props.shown ? "" : " hidden")} />
+        {props.fixed
+            ? <HSpaced style={{ position: "fixed" }}>
+                {<Shadowed color={theme.shadowColor} dx="3px" dy="3px" spread="10px" distance="3px" duration="0.2s" shown={props.shown}>
+                    {props.children}
+                </Shadowed>}
+            </HSpaced>
+            : <div className="fixed">
+                <Shadowed color={theme.shadowColor} dx="3px" dy="3px" spread="10px" distance="3px" duration="0.2s" shown={props.shown}>
+                        {props.children}
+                </Shadowed>
+            </div>
+        }
     </>
 }

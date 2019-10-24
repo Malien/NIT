@@ -1,17 +1,98 @@
-import React, { useContext, useState, useEffect, useReducer } from "react"
+import React, { useContext, useState, useEffect, useReducer, useRef } from "react"
 import Link from "next/link"
 
 import { ThemeContext, LookContext, Light, Dark } from "./style";
-import { VSpaced } from "./layout";
+import { VSpaced, HSpaced, SlideoverPanel } from "./layout";
 import { StoreItem } from "../shared/components";
 import { Section, SectionProps } from "./section";
 import { ShoppingCartContext, ShoppingCart, SCActionType, SHOPPING_CART_VERSION, SCReducer } from "./shopping";
+import { useMobileScroll, useWindowBounds, useCancel, useClick, useKeyDown } from "./hooks";
 
 //TODO: provide default image for product
 export const defaultImage = "";
 
+interface MobileHeaderProps {
+    onHamburger?: () => void;
+    title: string;
+    animated?: boolean;
+}
+export const MobileHeader: React.FC<MobileHeaderProps> = props => {
+    let shown = useMobileScroll(true, 50)
+    let theme = useContext(ThemeContext)
+    let look = useContext(LookContext)
+    return <>
+        <style jsx>{`
+            header {
+                display: flex;
+                z-index: 10;
+                width: 100%;
+                height: 50px;
+                position: fixed;
+                top: 0;
+                /* left: 0; */
+                background-color: ${theme.mobileHeaderColor};
+                transition: transform 0.2s 0s ease-in;
+                border-bottom: solid 1px ${theme.alternateTextSubcolor};
+            }
+            header::before {
+                content: "";
+                position: absolute;
+                display: block;
+                height: 100%;
+                width: 100%;
+                box-shadow: ${theme.shadowColor} 0px 3px 10px 3px;
+            }
+            header.hidden {
+                transform: translateY(-50px);
+            }
+            button {
+                appearance: none;
+                position: relative;
+                border: none;
+                background: none;
+                padding: 0;
+                margin: 5px 10px;
+                width: 40px;
+                height: 40px;
+                display: block;
+                padding-right: 10px;
+                border-right: solid 2px ${theme.textSubcolor};
+            }
+            span {
+                font-family: ${look.font};
+                font-size: ${look.mediumSize}px;
+                color: ${theme.textColor};
+                line-height: 50px;
+            }
+            .spacer {
+                margin-top: 50px;
+            }
+            .line {
+                width: 100%;
+                height: 4px;
+                border-radius: 2px;
+                background-color: ${theme.textColor};
+                margin: 5px 0;
+                pointer-events: none;
+            }
+        `}</style>
+        <header className={shown ? "" : "hidden"}>
+            <button className={props.animated ? "animated" : ""} onClick={() => {
+                console.log("ham")
+                if (props.onHamburger) props.onHamburger()
+            }}>
+                <div className="line" />
+                <div className="line" />
+                <div className="line" />
+            </button>
+            <span>{props.title}</span>
+        </header>
+        <div className="spacer" />
+    </>
+}
+
 interface NavLinkProps {
-    thumb: string;
+    thumb?: JSX.Element;
     label: string;
     href: string;
     selected?: boolean;
@@ -26,9 +107,12 @@ export const NavLink: React.FC<NavLinkProps> = props => {
                 display: contents;
                 padding: 10px 20px;
             }
-            img {
+            div {
                 grid-column: 1;
                 width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
             span {
                 grid-column: 2;
@@ -40,15 +124,21 @@ export const NavLink: React.FC<NavLinkProps> = props => {
         `}</style>
         <Link href={props.href}>
             <a>
-                <img src={props.thumb} />
+                <div>{props.thumb}</div>
                 <span>{props.label}</span>
             </a>
         </Link>
     </>
 }
 
-export const Sidebar: React.FC<{path?: string}> = props => {
+interface SidebarProps {
+    path?: string;
+    hidden?: boolean;
+}
+export const Sidebar: React.FC<SidebarProps> = props => {
     let theme = useContext(ThemeContext)
+    // let circle = <div style={{height: 15, width: 15, backgroundColor: theme.alternateTextColor, borderRadius: "50%"}} />
+    let circle = <></>
     return <>
         <style jsx>{`
             .navigation {
@@ -57,11 +147,16 @@ export const Sidebar: React.FC<{path?: string}> = props => {
                 margin: 10px;
             }
             header {
+                z-index: 20;
                 position: fixed;
                 width: 250px;
                 height: 100vh;
                 background-color: ${theme.headerColor};
                 box-shadow: ${theme.shadowColor} 5px 0px 8px;
+                transition: transform 0.2s 0s ease-in;
+            }
+            header.hidden {
+                transform: translateX(-260px);
             }
             img {
                 margin: 5%;
@@ -71,16 +166,15 @@ export const Sidebar: React.FC<{path?: string}> = props => {
                 margin-right: 250px;
             }
         `}</style>
-        <header>
+        <header className={props.hidden ? "hidden" : ""}>
             <img src="static/assets/SVG/White-logo.svg" className="logo" alt="Shop logo" />
             <div className="navigation">
-                <NavLink selected={props.path == "/"} thumb="" label="All Items" href="/" />
-                <NavLink selected={props.path == "/accessories"} thumb="" label="Hats" href="/accessories" />
-                <NavLink selected={props.path == "/tops"} thumb="" label="Tops" href="/tops" />
-                <NavLink selected={props.path == "/leggins"} thumb="" label="Leggins" href="/leggins" />
+                <NavLink selected={props.path == "/"} thumb={circle} label="All Items" href="/" />
+                <NavLink selected={props.path == "/accessories"} thumb={circle} label="Hats" href="/accessories" />
+                <NavLink selected={props.path == "/tops"} thumb={circle} label="Tops" href="/tops" />
+                <NavLink selected={props.path == "/leggins"} thumb={circle} label="Leggins" href="/leggins" />
             </div>
         </header>
-        <div className="spacer" />
     </>
 }
 
@@ -155,13 +249,27 @@ export const Footer: React.FC = props => {
     </>
 }
 
-export const AppFrame: React.FC<{path?: string}> = props => {
+export const AppFrame: React.FC<{ path?: string }> = props => {
     let [theme, setTheme] = useState(Light)
-
+    let { width } = useWindowBounds()
+    let mobile: boolean = (width) ? width < 700 : false;
+    let [hiddenSidebar, setHiddenSidebar] = useState(true)
+    let dimmingRef = useRef<HTMLDivElement>(null)
+    useClick(dimmingRef, () => {
+        if (!hiddenSidebar) setHiddenSidebar(true)
+    }, [hiddenSidebar])
+    useKeyDown((e) => {
+        if (!hiddenSidebar && e.key == "Escape") setHiddenSidebar(true)
+    }, [hiddenSidebar])
+    
+    useEffect(() => {
+        if (width && width < 700 && !hiddenSidebar) setHiddenSidebar(true)
+        if (width && width > 700 && hiddenSidebar) setHiddenSidebar(false)
+    }, [width])
     useEffect(() => {
         let match = window.matchMedia("(prefers-color-scheme: dark)").matches
         setTheme(match ? Dark : Light)
-
+        
         function match_func({ matches }: MediaQueryListEvent) {
             if (matches) setTheme(Dark)
             else setTheme(Light)
@@ -169,7 +277,7 @@ export const AppFrame: React.FC<{path?: string}> = props => {
         window.matchMedia("(prefers-color-scheme: dark)").addListener(match_func)
         return () => window.matchMedia("(prefers-color-scheme: dark)").removeListener(match_func)
     }, [])
-
+    
     return <>
         <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:700&display=swap" rel="stylesheet" />
         <ThemeContext.Provider value={theme}>
@@ -193,9 +301,44 @@ export const AppFrame: React.FC<{path?: string}> = props => {
                     position: relative;
                     overflow-x: hidden;
                 }
+                .sidebar {
+                    margin-right: 250px;
+                }
+                .dimmer {
+                    width: 100vw;
+                    height: 100vh;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    background-color: ${theme.dimmingColor};
+                    opacity: 1;
+                    z-index: 15;
+                    transition: opacity 0.2s 0s ease-in;
+                }
+                .dimmer.hidden {
+                    opacity: 0;
+                    z-index: 0;
+                }
+                .spacer {
+                    margin-right: 250px;
+                }
             `}</style>
             <div className="app">
-                <Sidebar path={props.path} />
+                {/* <SlideoverPanel fixed={!mobile} shown={!hiddenSidebar} onDismiss={() => {
+                    setHiddenSidebar(true)
+                }}>
+                    <Sidebar path={props.path}/>
+                </SlideoverPanel> */}
+                <Sidebar path={props.path} hidden={hiddenSidebar}/>
+                {mobile 
+                    ? <>
+                        <div ref={dimmingRef} className={"dimmer" + (hiddenSidebar ? " hidden" : "")} />
+                        <MobileHeader title="Items" onHamburger={() => {
+                            setHiddenSidebar(!hiddenSidebar)
+                        }} />
+                        </>
+                    : <div className="spacer" />
+                }
                 <div className="content">
                     {props.children}
                     <VSpaced style={{ bottom: 0, width: "100%" }}>
