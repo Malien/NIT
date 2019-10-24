@@ -3,12 +3,14 @@ import { StoreItem } from "../shared/components"
 import { AdaptiveGrid, GridCell } from "./layout"
 import { GridItem } from "./grid-item"
 import { ThemeContext, LookContext } from "./style"
+import Link from "next/link"
 
 const maxRating = 3.5
 const maxWidth = 3
 const maxHeight = 2
 
 export interface SectionProps {
+    link?: string
     title?: string;
     items: StoreItem[];
     onBuy?: (item: StoreItem) => void;
@@ -50,6 +52,13 @@ export const Section: React.FC<SectionProps> = props => {
                 font-family: ${look.font};
                 font-size: ${look.extraLarge}px;
             }
+            a {
+                padding: 10px;
+                color: ${theme.textColor};
+                font-family: ${look.font};
+                font-size: ${look.extraLarge}px;
+                text-decoration: none;
+            }
             .divider {
                 margin: 40px 5% 20px;
                 height: 4px;
@@ -60,10 +69,13 @@ export const Section: React.FC<SectionProps> = props => {
         `}</style>
         <div>
             <div className="container">
-                {props.title && <>
-                    <div className="divider"/>
-                    <span>{props.title}</span>
-                </>}
+                {props.title && <div className="divider"/>}
+                {props.title && 
+                    (props.link 
+                        ? <Link href={props.link}>
+                            <a>{props.title}</a>
+                        </Link>
+                        : <span>{props.title}</span>)}
                 <AdaptiveGrid columnWidth={300} rowHeight={300} responsive>
                     {items}
                 </AdaptiveGrid>

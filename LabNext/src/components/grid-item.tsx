@@ -95,7 +95,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
             }
             img {
                 ${props.outOfStock ? "filter: saturate(50%);" : ""}
-                width: 100%;
+                ${contentHeight > contentWidth ? "height" : "width"}: 100%;
                 padding-bottom: 100%;
                 position: absolute;
                 top: 0;

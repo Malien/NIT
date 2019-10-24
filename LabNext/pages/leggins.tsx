@@ -5,7 +5,7 @@ import { NextPage } from "next";
 interface LegginsPageProps {
     items: StoreItem[];
 }
-const LegginsPage: NextPage<LegginsPageProps> = props => <AppFrame path="/leggins">
+const LegginsPage: NextPage<LegginsPageProps> = props => <AppFrame path="/leggins" name="Pants and leggins">
     <Storefront items={props.items} />
 </AppFrame>
 LegginsPage.getInitialProps = async (ctx) => {

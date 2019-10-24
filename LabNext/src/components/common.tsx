@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useReducer, useRef } from "react"
 import Link from "next/link"
+import Head from "next/head"
 
 import { ThemeContext, LookContext, Light, Dark } from "./style";
 import { VSpaced, HSpaced, SlideoverPanel } from "./layout";
@@ -249,7 +250,7 @@ export const Footer: React.FC = props => {
     </>
 }
 
-export const AppFrame: React.FC<{ path?: string }> = props => {
+export const AppFrame: React.FC<{ path?: string; name?: string }> = props => {
     let [theme, setTheme] = useState(Light)
     let { width } = useWindowBounds()
     let mobile: boolean = (width) ? width < 700 : false;
@@ -261,7 +262,7 @@ export const AppFrame: React.FC<{ path?: string }> = props => {
     useKeyDown((e) => {
         if (!hiddenSidebar && e.key == "Escape") setHiddenSidebar(true)
     }, [hiddenSidebar])
-    
+
     useEffect(() => {
         if (width && width < 700 && !hiddenSidebar) setHiddenSidebar(true)
         if (width && width > 700 && hiddenSidebar) setHiddenSidebar(false)
@@ -269,7 +270,7 @@ export const AppFrame: React.FC<{ path?: string }> = props => {
     useEffect(() => {
         let match = window.matchMedia("(prefers-color-scheme: dark)").matches
         setTheme(match ? Dark : Light)
-        
+
         function match_func({ matches }: MediaQueryListEvent) {
             if (matches) setTheme(Dark)
             else setTheme(Light)
@@ -277,7 +278,7 @@ export const AppFrame: React.FC<{ path?: string }> = props => {
         window.matchMedia("(prefers-color-scheme: dark)").addListener(match_func)
         return () => window.matchMedia("(prefers-color-scheme: dark)").removeListener(match_func)
     }, [])
-    
+
     return <>
         <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:700&display=swap" rel="stylesheet" />
         <ThemeContext.Provider value={theme}>
@@ -323,20 +324,18 @@ export const AppFrame: React.FC<{ path?: string }> = props => {
                     margin-right: 250px;
                 }
             `}</style>
+            <Head>
+                <title>{"Fast Shop" + (props.name ? `: ${props.name}`: "")}</title>
+            </Head>
             <div className="app">
-                {/* <SlideoverPanel fixed={!mobile} shown={!hiddenSidebar} onDismiss={() => {
-                    setHiddenSidebar(true)
-                }}>
-                    <Sidebar path={props.path}/>
-                </SlideoverPanel> */}
-                <Sidebar path={props.path} hidden={hiddenSidebar}/>
-                {mobile 
+                <Sidebar path={props.path} hidden={hiddenSidebar} />
+                {mobile
                     ? <>
                         <div ref={dimmingRef} className={"dimmer" + (hiddenSidebar ? " hidden" : "")} />
-                        <MobileHeader title="Items" onHamburger={() => {
+                        <MobileHeader title={props.name || "Fast shop"} onHamburger={() => {
                             setHiddenSidebar(!hiddenSidebar)
                         }} />
-                        </>
+                    </>
                     : <div className="spacer" />
                 }
                 <div className="content">
