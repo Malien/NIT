@@ -169,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = props => {
             }
         `}</style>
         <header className={props.hidden ? "hidden" : ""}>
-            <img src="static/assets/SVG/White-logo.svg" className="logo" alt="Shop logo" />
+            <img src="static/assets/SVG/white-logo.svg" className="logo" alt="Shop logo" />
             <div className="navigation">
                 <NavLink selected={props.path == "/"} thumb={circle} label="All Items" href="/" />
                 <NavLink selected={props.path == "/accessories"} thumb={circle} label="Hats" href="/accessories" />
@@ -229,6 +229,9 @@ export const Footer: React.FC = props => {
             .footer-contact {
                 font-size: ${look.smallSize}px;
             }
+            .space {
+                margin-top: 1em;
+            }
             @media (max-width: 700px) {
                 footer {
                     flex-direction: column;
@@ -236,7 +239,7 @@ export const Footer: React.FC = props => {
             }
         `}</style>
         <footer>
-            <img src="static/assets/SVG/White-logo.svg" className="logo" alt="Shop logo" />
+            <img src="static/assets/SVG/white-logo.svg" className="logo" alt="Shop logo" />
             <div className="footer-textbox">
                 <span className="text-thin">Designed and developed by</span>
                 <span className="text-bold">Petryk Yaroslav</span>
@@ -251,6 +254,7 @@ export const Footer: React.FC = props => {
                     <span className="text-bold">Should I have one?</span>
                 </div>
             </div>
+            <div className="space" />
             <span className="copyright ">© Petryk Yaroslav. 2019. Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</span>
         </footer>
     </>
