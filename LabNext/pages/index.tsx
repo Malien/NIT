@@ -1,8 +1,9 @@
 import React from "react"
-import { AppFrame, Storefront } from "../src/components/common"
+import { AppFrame, Storefront, ErrorMsg } from "../src/components/common"
 import { StoreItem } from "../src/shared/components";
 import { v1 as uuid } from "uuid";
 import { NextPage } from "next";
+import { fetchItems } from "../src/api/browser";
 
 const desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
@@ -73,10 +74,12 @@ interface IndexPageProps {
     hats: StoreItem[];
     tops: StoreItem[];
     leggins: StoreItem[];
+    err?: boolean;
 }
 
 const IndexPage: NextPage<IndexPageProps> = props => {
     return <AppFrame path="/" name="All Items">
+        {props.err && <ErrorMsg msg="Error occured while loading products" />}
         <Storefront items={items} sections={[
             {title: "Hats and Accessories", items: props.hats, link:"/accessories" },
             {title: "Jackets and tops", items: props.tops, link:"/tops"},
@@ -85,22 +88,21 @@ const IndexPage: NextPage<IndexPageProps> = props => {
     </AppFrame>
 }
 IndexPage.getInitialProps = async (ctx) => {
-    return {
-        hats: require("../static/items/hats.json").slice(0, 6),
-        tops: require("../static/items/tops.json").slice(0, 6),
-        leggins: require("../static/items/leggins.json").slice(0, 6)
+    if (ctx.req) {
+        // node.js
+        return {
+            hats: require("../static/items/hats.json"),
+            tops: require("../static/items/tops.json"),
+            leggins: require("../static/items/leggins.json")
+        }
+    } else {
+        // browser
+        return fetchItems({
+            hats: "/static/items/hats.json",
+            tops: "/static/items/tops.json",
+            leggins: "/static/items/leggins.json"
+        }, [])
     }
-    // return Promise.all([
-    //     fetch("http://localhost:3000/static/items/hats.json"),
-    //     fetch("http://localhost:3000/static/items/top.json"),
-    //     fetch("http://localhost:3000/static/items/leggins.json")
-    // ])
-    // .then((res) => Promise.all(res.map(v => v.json())))
-    // .then(([hats, tops, leggins]) => {
-    //     return {
-    //         hats, tops, leggins
-    //     }
-    // })
 }
 
 export default IndexPage

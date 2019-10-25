@@ -75,6 +75,11 @@ export const GridItem: React.FC<GridItemProps> = props => {
         }
     }, [hovered])
 
+    // let name = nameRef.current
+    // let singleSize = (name && name.scrollWidth > name.offsetWidth) 
+    //     ? (name.offsetWidth / name.scrollWidth * look.extraLarge) 
+    //     : look.extraLarge; 
+
     let expandedHeight = contentHeight > infoHeight ? contentHeight - infoHeight : 0
     let [name1, name2] = splitName(props.name)
 
@@ -94,7 +99,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
                 overflow: hidden;
             }
             img {
-                ${props.outOfStock ? "filter: saturate(50%);" : ""}
+                ${props.outOfStock ? "filter: saturate(35%);" : ""}
                 ${contentHeight > contentWidth ? "height" : "width"}: 100%;
                 padding-bottom: 100%;
                 position: absolute;
