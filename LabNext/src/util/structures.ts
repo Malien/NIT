@@ -5,6 +5,7 @@ const right = i => (i + 1) << 1;
 
 type cmp<T> = (a: T, b: T) => boolean
 
+// Not used anywhere, should probably remove from file
 export class PriorityQueue<T> {
     _heap: T[];
     _comparator: cmp<T>;

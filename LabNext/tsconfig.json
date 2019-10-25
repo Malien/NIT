@@ -15,7 +15,7 @@
     ],
     "lib": [
       "dom",
-      "es2019"
+      "es2015"
     ],
     "allowJs": true,
     "skipLibCheck": true,
