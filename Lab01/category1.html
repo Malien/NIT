@@ -3,6 +3,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
+    <script src="scripts/items.js"></script>
+    <script src="scripts/shop.js"></script>
     <title>Fast Shop</title>
 </head>
 <body>
@@ -12,9 +14,9 @@
         <div class="nav-scroll">
             <ul class="navigation">
                 <a href="index.html"><li class="nav-item">All Items</li></a>
-                <a href="category1.html"><li class="nav-item current">Category 1</li></a>
-                <a href="category2.html"><li class="nav-item">Category 2</li></a>
-                <a href="category3.html"><li class="nav-item">Category 3</li></a>
+                <a href="category1.html"><li class="nav-item current">Accessories</li></a>
+                <a href="category2.html"><li class="nav-item">Tops</li></a>
+                <a href="category3.html"><li class="nav-item">Leggins</li></a>
                 <a href="https://www.duckduckgo.com"><li class="nav-item">Placeholder</li></a>
             </ul>
         </div>
@@ -22,80 +24,20 @@
     <div class="spacer"></div>
     <div class="content">
         <span class="print-message">You can purchase any of these products on our site: www.thereIsNoDomainNameForThisProject.com</span>
-        <div class="content-grid">
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <span class="price">$249.99</span>
-                    <button class="item-button">Buy</button>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <div class="prices">
-                        <span class="old-price">$399.99</span>
-                        <span class="price">$249.99</span>
-                    </div>
-                    <button class="item-button">Buy</button>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <div class="prices">
-                        <span class="old-price">$49.99</span>
-                        <span class="price">$34.99</span>
-                    </div>
-                    <button class="item-button">Buy</button>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <span class="price">$399.99</span>
-                    <button class="item-button">Buy</button>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <div class="prices">
-                        <span class="old-price">$39.99</span>
-                        <span class="price">$24.99</span>
-                    </div>
-                    <button class="item-button">Buy</button>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <span class="price">$24.99</span>
-                    <button class="item-button">Buy</button>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="assets/SVG/category-1.svg" class="item-image" alt="Item image">
-                <span class="text-bold"><a href="category1.html">Item name</a></span>
-                <span class="text-thin">Item description where quite a few things can be said  </span>
-                <div class="item-price">
-                    <div class="prices">
-                        <span class="old-price">$39.99</span>
-                        <span class="price">$24.99</span>
-                    </div>
-                    <button class="item-button">Buy</button>
+        <div class="content-grid" id="hats-grid"></div>
+        <div id="cart-dimmer" class="hidden"></div>
+        <div id="cart" class="hidden">
+            <img class="cart-img" alt="Shopping cart" src="assets/SVG/cart.svg">
+            <div id="cart-column" class="hidden">
+                <span class="cart-title">Shopping cart</span>
+                <div class="cart-divider"></div>
+                <div class="cart-items">
+                    <div class="cart-header-spacer"></div>
+                    <div id="cart-noitems">No items in the cart</div>
+                    <div id="cart-list"></div>
+                    <div id="cart-total">Total: $0</div>
+                    <div class="cart-button-spacer"></div>
+                    <button id="cart-button" disabled>Proceed to checkout</button>
                 </div>
             </div>
         </div>
