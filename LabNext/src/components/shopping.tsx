@@ -204,7 +204,8 @@ export const ShoppingCart: React.FC<SCProps> = props => {
                 pointer-events: none;
             }
         `}</style>
-        {checkout && <CheckoutPane name="Ярослав" email="yaroslav01@ukr.net" phone="+380674685895" cart={props.items} onDismiss={() => {
+        {/*TODO: Implement credentials cache*/}
+        {checkout && <CheckoutPane cart={props.items} onDismiss={() => {
             setCheckout(false)
         }}/>}
         <div ref={dimmerRef} className={"dimmer" + (props.shown ? "" : " hidden")} />

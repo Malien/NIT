@@ -6,6 +6,7 @@ import { useMounted, useCancel, useInputState } from "./hooks";
 import { submitPurchase } from "../api/tron";
 import { fromEntries } from "../util/pollyfilling";
 import { StdErrContext } from "./errors";
+import { BuyButton } from "./grid-item";
 
 interface CheckoutPaneProps {
     cart: SCItem[];
@@ -127,6 +128,78 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
             }
             input.invalid::after {
                 opacity: 1;
+            }
+            button {
+                outline: 0;
+                appearance: none;
+                position: relative;
+                height: 2em;
+                border: none;
+                background: none;
+                color: ${theme.alternativeColor};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: ${look.font};
+                font-size: ${look.mediumSize}px;
+                border: solid 4px ${theme.alternativeColor};
+                border-radius: 1em;
+                padding: 0 20px;
+                flex-shrink: 0;
+                flex-wrap: wrap;
+                font-weight: ${look.boldWeight};
+                transition: color 0.2s ease-in;
+            }
+            button::before {
+                z-index: -1;
+                width: 100%;
+                height: 100%;
+                border-radius: 1em;
+                background-color: ${theme.alternativeColor};
+                content: "";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                opacity: 0;
+                transition: opacity 0.2s 0s ease-in;
+            }
+            button::after {
+                content: "";
+                display: block;
+                width: 100%;
+                height: 100%;
+                border-radius: 1em;
+                position: absolute;
+                top: -4px;
+                left: -4px;
+                border: 4px solid white;
+                opacity: 0;
+                /*transition: opacity 0.1s 0s ease-in;*/
+            }
+            button:hover {
+                color: ${theme.alternateTextColor};
+            }
+            button:active::after {
+                /*opacity: 1;*/
+            }
+            button:active::before {
+                background-color: ${theme.alternativeSubcolor};
+            }
+            button:hover::before {
+                opacity: 1;
+            }
+            button:disabled {
+                border: none;
+            }
+            button:disabled::before {
+                background-color: ${theme.disabledColor};
+                opacity: 1;
+            }
+            form {
+                display: flex;
+                align-items: center;
+                flex-direction: column;
             }
         `}</style>
         <div className={classes({dimmer: true, hidden: !mounted || dismissed})} ref={dimmerRef} />

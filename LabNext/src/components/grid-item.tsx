@@ -74,7 +74,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
     let scrollRef = useRef<HTMLDivElement>(null)
     
     let [inited, setInited] = useState(false)
-    let hovered = useHover(scrollRef)
+    let hovered = useHover(contentRef)
 
     useEffect(() => {
         let content = contentRef.current
