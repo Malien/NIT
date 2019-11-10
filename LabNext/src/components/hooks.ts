@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import ResizeObserver from "resize-observer-polyfill"
+import { string } from "prop-types"
 
 export interface Bounds {
     width: number;
@@ -13,22 +14,21 @@ export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => v
     }, deps)
 }
 
-export function useCancel<T extends HTMLElement>(ref: React.RefObject<T>, cb: () => void, deps: any[] = []) {
+export function useCancel<T extends HTMLElement>(ref: React.RefObject<T>, cb: () => void, deps?: any[]) {
     useEffect(() => {
-        const mfunc = (event: MouseEvent) => {
-            let el = ref.current
-            if (el
-                && event.target
-                && !el.contains(event.target as Node)
-            ) cb()
+        const mfunc = () => {
+            cb()
         }
-        document.addEventListener("click", mfunc)
-        return () => document.removeEventListener("click", mfunc)
-    }, [ref, ...deps])
+        let el = ref.current
+        if (el) el.addEventListener("click", mfunc)
+        return () => {
+            if (el) el.removeEventListener("click", mfunc)
+        }
+    }, deps ? [ref, ...deps] : undefined)
 
     useKeyDown((event) => {
         if (event.key === "Escape") cb()
-    }, deps)
+    }, deps ? [...deps] : undefined)
 }
 
 export function useResize<T extends HTMLElement>(ref: React.RefObject<T> | T, cb: (bounds: Bounds, element: T) => void) {
@@ -191,4 +191,26 @@ export function useMounted() {
     let [mounted, setMounted] = useState(false)
     useEffect(() => setMounted(true), [])
     return mounted
+}
+
+interface PartialInputState {
+    value: string;
+}
+interface ValidatedInputState extends PartialInputState{
+    valid: boolean;
+}
+type InputState = PartialInputState | ValidatedInputState
+export function useInputState(params: {value?: string, pattern: RegExp | string}) : [ValidatedInputState, (value: string) => void]
+export function useInputState(params: {value?: string}) : [PartialInputState, (value: string) => void]
+
+export function useInputState({value, pattern}: {value?: string, pattern?: RegExp | string}) : [InputState, (value: string) => void] {
+    let defaultState = (pattern) ? {value: value || "", valid: true} : {value: value || ""} 
+    let [state, setState] = useState<InputState>(defaultState)
+    if (pattern) {
+        let p = (typeof pattern == "string") ? new RegExp(pattern) : pattern
+        return [state, (value: string) => {
+            setState({value, valid: p.test(value)})
+        }]
+    } 
+    return [state, (value: string) => {setState({value})}]
 }

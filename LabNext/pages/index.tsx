@@ -1,8 +1,9 @@
 import { StoreItem, TronCategory } from "../src/shared/components";
-import { AppFrame, Storefront, ErrorMsg } from "../src/components/common";
+import { AppFrame, Storefront } from "../src/components/common";
 import { NextPage } from "next";
 import { fetchItems, toStoreItem, fetchCachedCategories } from "../src/api/tron";
 import { fetchItems as fetchItemsNode, fetchCategories as fetchCategoriesNode } from "../src/api/nodeTron";
+import { ErrorMsg } from "../src/components/errors";
 
 interface LegginsPageProps {
     items: StoreItem[];

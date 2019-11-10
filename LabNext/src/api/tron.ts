@@ -1,4 +1,5 @@
 import { TronItem, StoreItem, TronCategory } from "../shared/components";
+import qs from "qs";
 
 export function toStoreItem(from: TronItem): StoreItem;
 export function toStoreItem(from: TronItem[]): StoreItem[];
@@ -58,4 +59,24 @@ export async function fetchCachedCategories() {
 export async function fetchItem(id: string) : Promise<TronItem> {
     return fetch(`https://nit.tron.net.ua/api/product/${id}`)
         .then(val => val.json())
+}
+
+export interface PurchaseRequest {
+    name: string;
+    phone: string;
+    email: string;
+    products: {[id: string]: number}
+}
+export async function submitPurchase(req: PurchaseRequest) {
+    let tokened = {...req, token: "OSGYH4gE_8ae_UU1-msa"}
+    let body = qs.stringify(tokened)
+    return fetch("https://nit.tron.net.ua/api/order/add", {
+        method: "POST",
+        headers: {
+            'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        body
+    })
+    // let url = `https://nit.tron.net.ua/api/order/add?name=${encodeURIComponent()}`
+    // return fetch("https://nit.tron.net.ua/api/order/add")
 }

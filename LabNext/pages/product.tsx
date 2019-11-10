@@ -1,9 +1,10 @@
 import { NextPage } from "next";
 import { TronCategory, StoreItem } from "../src/shared/components";
-import { AppFrame, ErrorMsg } from "../src/components/common";
+import { AppFrame } from "../src/components/common";
 import { ProductView, NoProduct } from "../src/components/products";
 import { fetchItem as fetchItemNode, fetchCategories as fetchCategoriesNode } from "../src/api/nodeTron";
 import { toStoreItem, fetchItem, fetchCachedCategories } from "../src/api/tron";
+import { ErrorMsg } from "../src/components/errors";
 
 interface ProductPageProps {
     item?: StoreItem;

@@ -5,6 +5,8 @@ import { defaultImage } from "./common"
 import { useClick, useKeyDown } from "./hooks"
 import { ThumbList, VSpaced } from "./layout"
 import { LookContext, ThemeContext } from "./style"
+import { CheckoutPane } from "./checkout"
+import { classes } from "./util"
 
 export const SHOPPING_CART_VERSION = 1
 
@@ -67,6 +69,7 @@ export interface SCProps {
 export const ShoppingCart: React.FC<SCProps> = props => {
     let ref = useRef<HTMLDivElement>(null)
     let dimmerRef = useRef<HTMLDivElement>(null)
+    let [checkout, setCheckout] = useState(false)
 
     let dispatch = useContext(ShoppingCartContext)
     let theme = useContext(ThemeContext)
@@ -85,18 +88,6 @@ export const ShoppingCart: React.FC<SCProps> = props => {
     let surfaced = props.items.length != 0 || props.shown
     let totalCost = props.items.reduce((sum, item) => sum + item.count * item.price, 0)
     let buyable = props.items.length != 0 && !props.items.reduce((acc, now) => acc || now.outOfStock, false) && totalCost != 0
-    let titems = Object.values(props.items).map((item, index) =>
-        <ShoppingCartItem
-            key={index}
-            count={item.count}
-            onChange={count => {
-                if (dispatch) dispatch({ id: index, count, type: SCActionType.set })
-            }}
-            onSubmit={count => {
-                if (dispatch) dispatch({ id: index, count, type: SCActionType.submit })
-            }}
-            {...item}
-        />)
 
     return <>
         <style jsx>{`
@@ -197,17 +188,6 @@ export const ShoppingCart: React.FC<SCProps> = props => {
             .header-spacer {
                 margin-top: 0px;
             }
-            .total {
-                font-family: ${look.font};
-                font-size: ${look.mediumSize}px;
-                color: ${theme.textSubcolor};
-                width: 100%;
-                margin: 20px 0;
-                text-align: center;
-            }
-            .total.disabled {
-                color: ${theme.disabledColor};
-            }
             .dimmer {
                 position: fixed;
                 width: 100vw;
@@ -224,6 +204,9 @@ export const ShoppingCart: React.FC<SCProps> = props => {
                 pointer-events: none;
             }
         `}</style>
+        {checkout && <CheckoutPane name="Ярослав" email="yaroslav01@ukr.net" phone="+380674685895" cart={props.items} onDismiss={() => {
+            setCheckout(false)
+        }}/>}
         <div ref={dimmerRef} className={"dimmer" + (props.shown ? "" : " hidden")} />
         <div ref={ref} className={"container" + ((props.shown) ? "" : " hidden") + ((surfaced) ? " surfaced" : "")}>
             <img alt="Shopping cart" src="static/assets/SVG/cart.svg" />
@@ -232,15 +215,14 @@ export const ShoppingCart: React.FC<SCProps> = props => {
                 <div className="divider" />
                 <div className="items">
                     <div className="header-spacer" />
-                    {titems.length == 0
+                    {props.items.length == 0
                         ? <div className="noitems">No items in the cart</div>
                         : <>
-                            <ThumbList notop columns={4} thumbSize="80px">
-                                {titems}
-                            </ThumbList>
-                            <div className={"total" + (buyable ? "" : " disabled")}>Total: ${totalCost.toFixed(2)}</div>
+                            <SCItemList items={props.items} total={totalCost}/>
                             <VSpaced style={{ bottom: 0, right: 0 }}>
-                                <button disabled={!buyable}>Proceed to checkout</button>
+                                <button style={{pointerEvents: !props.shown ? "none" : "all"}} onClick={() => {
+                                    setCheckout(true)
+                                }} disabled={!buyable || !props.shown}>Proceed to checkout</button>
                             </VSpaced>
                         </>
                     }
@@ -250,12 +232,12 @@ export const ShoppingCart: React.FC<SCProps> = props => {
     </>
 }
 
-interface ShoppingCartItemProps extends StoreItem {
+interface SCItemViewProps extends StoreItem {
     count: number;
     onChange: (val: number) => void;
     onSubmit: (val?: number) => void;
 }
-export const ShoppingCartItem: React.FC<ShoppingCartItemProps> = props => {
+export const SCItemView: React.FC<SCItemViewProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
     let [selected, setSelected] = useState(false)
@@ -336,7 +318,6 @@ export const ShoppingCartItem: React.FC<ShoppingCartItemProps> = props => {
 interface CancelButtonProps {
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
-
 export const CancelButton: FC<CancelButtonProps> = props => {
     let theme = useContext(ThemeContext)
     return <>
@@ -405,6 +386,48 @@ export const CancelButton: FC<CancelButtonProps> = props => {
             <div className="arrow left" />
             <div className="arrow right" />
         </button>
+    </>
+}
+
+interface SCItemListProps {
+    items: SCItem[];
+    total?: number;
+}
+export const SCItemList: React.FC<SCItemListProps> = props => {
+    let dispatch = useContext(ShoppingCartContext)
+    let theme = useContext(ThemeContext)
+    let look = useContext(LookContext)
+
+    let titems = Object.values(props.items).map((item, index) =>
+        <SCItemView
+            key={item.id}
+            count={item.count}
+            onChange={count => {
+                if (dispatch) dispatch({ id: index, count, type: SCActionType.set })
+            }}
+            onSubmit={count => {
+                if (dispatch) dispatch({ id: index, count, type: SCActionType.submit })
+            }}
+            {...item}
+        />
+    )
+
+    return <>
+        <style jsx>{`
+        .total {
+            font-family: ${look.font};
+            font-size: ${look.mediumSize}px;
+            color: ${theme.textSubcolor};
+            width: 100%;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .total.disabled {
+            color: ${theme.disabledColor};
+        }
+        `}</style>
+        <ThumbList notop columns={4} thumbSize="80px">{titems}</ThumbList>
+        {props.total != undefined && <div className={classes({total: true, disabled: props.total == 0})}>Total: ${props.total.toFixed(2)}</div>}
     </>
 }
 
