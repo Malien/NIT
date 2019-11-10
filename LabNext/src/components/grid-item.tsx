@@ -4,8 +4,9 @@ import { easeInSine, scrollTo } from "./animate"
 import { useBounds, useHover } from "./hooks"
 import { LookContext, ThemeContext } from "./style"
 import { classes } from "./util"
+import Link from "next/link"
 
-function splitName(name: string): [string, string] {
+export function splitName(name: string): [string, string] {
     let words = name.split(" ")
     if (words.length < 2) return ["", name]
     let pivot = Math.floor(words.length / 2)
@@ -179,68 +180,6 @@ export const GridItem: React.FC<GridItemProps> = props => {
                 text-decoration: line-through;
                 color: ${theme.textSubcolor};
             }
-            button {
-                outline: 0;
-                appearance: none;
-                position: relative;
-                height: 2em;
-                border: none;
-                background: none;
-                color: ${theme.alternateTextColor};
-                display: flex;
-                align-items: center;
-                font-family: ${look.font};
-                font-size: ${look.mediumSize}px;
-                border: solid 4px ${theme.alternativeColor};
-                border-radius: 1em;
-                padding: 0 20px;
-                flex-shrink: 0;
-                flex-wrap: wrap;
-                font-weight: ${look.boldWeight};
-            }
-            button::before {
-                z-index: -1;
-                width: 100%;
-                height: 100%;
-                border-radius: 1em;
-                background-color: ${theme.alternativeColor};
-                content: "";
-                display: block;
-                position: absolute;
-                top: 0;
-                left: 0;
-                opacity: 0;
-                transition: opacity 0.2s 0s ease-in;
-            }
-            button::after {
-                content: "";
-                display: block;
-                width: 100%;
-                height: 100%;
-                border-radius: 1em;
-                position: absolute;
-                top: -4px;
-                left: -4px;
-                border: 4px solid white;
-                opacity: 0;
-                /*transition: opacity 0.1s 0s ease-in;*/
-            }
-            button:active::after {
-                /*opacity: 1;*/
-            }
-            button:active::before {
-                background-color: ${theme.alternativeSubcolor};
-            }
-            button:hover::before {
-                opacity: 1;
-            }
-            button:disabled {
-                border: none;
-            }
-            button:disabled::before {
-                background-color: ${theme.disabledColor};
-                opacity: 1;
-            }
             .bottom {
                 margin: 10px 0;
             }
@@ -258,20 +197,27 @@ export const GridItem: React.FC<GridItemProps> = props => {
             .dimmer.active {
                 opacity: 0.8;
             }
+            a {
+                text-decoration: none;
+            }
         `}</style>
         <div className="container" ref={contentRef}>
             <img src={props.previews[0]} alt="Product image" />
             <div className={classes({"dimmer": true, "active": hovered})}/>
             <div className={classes({"scroll": true, "animated": inited})} ref={scrollRef}>
                 <div className="info" ref={infoRef}>
-                    <div className="title" ref={nameRef}>{name1}<br/>{name2}</div>
+                    <div className="title" ref={nameRef}>
+                        <Link href={`/product?id=${props.id}`}>
+                            <a>{name1}<br/>{name2}</a>
+                        </Link>
+                    </div>
                     <span className="desc">{props.description}</span>
                     <div className="bottom">
                         <StarRating rating={props.rating} />
                         <div className="price">
                             {props.prevPrice && <span className="prev">${props.prevPrice}</span>}
                             <span className="cur">${props.price}</span>
-                            <button disabled={props.outOfStock} onClick={props.onBuy}>{props.outOfStock ? "Out of stock" : "Add to cart"}</button>
+                            <BuyButton outOfStock={props.outOfStock} onClick={props.onBuy} />
                         </div>
                     </div>
                 </div>
@@ -314,5 +260,88 @@ export const PlaceholderItem: React.FC = props => {
             <div className="title a" />
             <div className="title b" />
         </div>
+    </>
+
+}
+
+interface BuyButtonProps {
+    outOfStock?: boolean;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+}
+export const BuyButton: React.FC<BuyButtonProps> = props => {
+    let theme = useContext(ThemeContext)
+    let look = useContext(LookContext)
+
+    return <>
+        <style jsx>{`
+            button {
+                outline: 0;
+                appearance: none;
+                position: relative;
+                height: 2em;
+                border: none;
+                background: none;
+                color: ${theme.alternativeColor};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: ${look.font};
+                font-size: ${look.mediumSize}px;
+                border: solid 4px ${theme.alternativeColor};
+                border-radius: 1em;
+                padding: 0 20px;
+                flex-shrink: 0;
+                flex-wrap: wrap;
+                font-weight: ${look.boldWeight};
+                transition: color 0.2s ease-in;
+            }
+            button::before {
+                z-index: -1;
+                width: 100%;
+                height: 100%;
+                border-radius: 1em;
+                background-color: ${theme.alternativeColor};
+                content: "";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                opacity: 0;
+                transition: opacity 0.2s 0s ease-in;
+            }
+            button::after {
+                content: "";
+                display: block;
+                width: 100%;
+                height: 100%;
+                border-radius: 1em;
+                position: absolute;
+                top: -4px;
+                left: -4px;
+                border: 4px solid white;
+                opacity: 0;
+                /*transition: opacity 0.1s 0s ease-in;*/
+            }
+            button:hover {
+                color: ${theme.alternateTextColor};
+            }
+            button:active::after {
+                /*opacity: 1;*/
+            }
+            button:active::before {
+                background-color: ${theme.alternativeSubcolor};
+            }
+            button:hover::before {
+                opacity: 1;
+            }
+            button:disabled {
+                border: none;
+            }
+            button:disabled::before {
+                background-color: ${theme.disabledColor};
+                opacity: 1;
+            }
+        `}</style>
+        <button disabled={props.outOfStock} onClick={props.onClick}>{props.children}{props.outOfStock ? "Out of stock" : "Add to cart"}</button>
     </>
 }

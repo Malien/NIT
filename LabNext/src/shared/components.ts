@@ -12,7 +12,7 @@ export interface StoreItem {
     description?: string;
     prevPrice?: number;
     size?: string;
-    criteriaTable?: object;
+    criteriaTable?: {[key: string]: any};
     variants?: string[]
     bias?: number // Possible user-tracked bias to a product to promote it to the top
     outOfStock?: boolean

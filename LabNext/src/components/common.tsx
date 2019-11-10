@@ -64,6 +64,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = props => {
                 font-size: ${look.mediumSize}px;
                 color: ${theme.textColor};
                 line-height: 50px;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .spacer {
                 margin-top: 50px;
@@ -175,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = props => {
                 margin-top: 40px;
             }
 
-            @media (min-width: 700px) {
+            @media (min-width: 800px) {
                 header.hidden {
                     transform: translateX(0);
                 }
@@ -279,7 +281,7 @@ interface AppFrameProps {
 export const AppFrame: React.FC<AppFrameProps> = props => {
     let [theme, setTheme] = useState(Light)
     let { width } = useWindowBounds()
-    let [mobile, setMobile] = useState((width) ? width < 700 : true);
+    let [mobile, setMobile] = useState((width) ? width < 800 : true);
     let [sidebarShown, setSidebarShown] = useState(!mobile)
     let dimmingRef = useRef<HTMLDivElement>(null)
     useClick(dimmingRef, () => {
@@ -290,7 +292,7 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
     }, [sidebarShown, mobile])
 
     useEffect(() => {
-        setMobile((width) ? width < 700 : true)
+        setMobile((width) ? width < 800 : true)
     }, [width])
     useEffect(() => {
         let match = window.matchMedia("(prefers-color-scheme: dark)").matches

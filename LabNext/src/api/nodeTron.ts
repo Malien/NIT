@@ -29,3 +29,8 @@ export async function fetchCategories() : Promise<TronCategory[]> {
     return fetch("https://nit.tron.net.ua/api/category/list")
         .then(val => val.json())
 }
+
+export async function fetchItem(id: string) : Promise<TronItem> {
+    return fetch(`https://nit.tron.net.ua/api/product/${id}`)
+        .then(val => val.json())
+}

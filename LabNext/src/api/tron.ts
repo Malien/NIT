@@ -54,3 +54,8 @@ export async function fetchCachedCategories() {
     if (!cache) cache = await fetchCategories()
     return cache;
 }
+
+export async function fetchItem(id: string) : Promise<TronItem> {
+    return fetch(`https://nit.tron.net.ua/api/product/${id}`)
+        .then(val => val.json())
+}
