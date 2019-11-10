@@ -7,7 +7,7 @@ import { NoSSR, VSpaced } from "./layout";
 import { Section, SectionProps } from "./section";
 import { SCActionType, ShoppingCart, ShoppingCartContext, useShoppingCart } from "./shopping";
 import { Dark, Light, LookContext, ThemeContext } from "./style";
-
+import { useMessageDispatch, StdErrContext, ErrorMsg } from "./errors";
 
 //TODO: provide default image for product
 export const defaultImage = "";
@@ -306,79 +306,84 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
         return () => window.matchMedia("(prefers-color-scheme: dark)").removeListener(match_func)
     }, [])
 
+    let [msg, errMsgDispatch] = useMessageDispatch()
+
     let [shoppingCartItems, shoppingDispatch] = useShoppingCart()
 
     return <>
         <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:700&display=swap" rel="stylesheet" />
         <ThemeContext.Provider value={theme}>
-            <style global jsx>{`
-                body {
-                    margin: 0;
-                    padding: 0;
-                    background-color: ${theme.backgroundColor};
-                }
-                a {
-                    color: inherit;
-                }
-            `}</style>
-            <style jsx>{`
-                .app {
-                    display: flex;
-                    position: relative;
-                }
-                .content {
-                    width: 100%;
-                    min-height: 100vh;
-                    position: relative;
-                    overflow-x: hidden;
-                }
-                .sidebar {
-                    margin-right: 250px;
-                }
-                .dimmer {
-                    width: 100vw;
-                    height: 100vh;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    background-color: ${theme.dimmingColor};
-                    opacity: 1;
-                    z-index: 15;
-                    transition: opacity 0.2s 0s ease-in;
-                }
-                .dimmer.hidden {
-                    opacity: 0;
-                    z-index: 0;
-                }
-                .spacer {
-                    margin-right: 270px;
-                }
-            `}</style>
-            <Head>
-                <title>{"Fast Shop" + (props.name ? `: ${props.name}` : "")}</title>
-            </Head>
-            <div className="app">
-                <Sidebar path={props.path} hidden={!sidebarShown} categories={props.categories} />
-                {!mobile ? <div className="spacer" /> : undefined}
-                {/* <NoSSR> */}
-                    <div className="content">
-                        {mobile && <>
-                            <div ref={dimmingRef} className={"dimmer" + (sidebarShown ? "" : " hidden")} />
-                            <MobileHeader title={props.name || "Fast shop"} onHamburger={() => {
-                                setSidebarShown(!sidebarShown)
-                            }} />
-                        </>
-                        }
-                        <ShoppingCartContext.Provider value={shoppingDispatch}>
-                            {props.children}
-                            <ShoppingCart {...shoppingCartItems} />
-                        </ShoppingCartContext.Provider>
-                        <VSpaced style={{ bottom: 0, width: "100%" }}>
-                            <Footer />
-                        </VSpaced>
-                    </div>
-                {/* </NoSSR> */}
-            </div>
+            <StdErrContext.Provider value={errMsgDispatch}>
+                <style global jsx>{`
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background-color: ${theme.backgroundColor};
+                    }
+                    a {
+                        color: inherit;
+                    }
+                `}</style>
+                <style jsx>{`
+                    .app {
+                        display: flex;
+                        position: relative;
+                    }
+                    .content {
+                        width: 100%;
+                        min-height: 100vh;
+                        position: relative;
+                        overflow-x: hidden;
+                    }
+                    .sidebar {
+                        margin-right: 250px;
+                    }
+                    .dimmer {
+                        width: 100vw;
+                        height: 100vh;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        background-color: ${theme.dimmingColor};
+                        opacity: 1;
+                        z-index: 15;
+                        transition: opacity 0.2s 0s ease-in;
+                    }
+                    .dimmer.hidden {
+                        opacity: 0;
+                        z-index: 0;
+                    }
+                    .spacer {
+                        margin-right: 270px;
+                    }
+                `}</style>
+                <Head>
+                    <title>{"Fast Shop" + (props.name ? `: ${props.name}` : "")}</title>
+                </Head>
+                <ErrorMsg msg={msg} />
+                <div className="app">
+                    <Sidebar path={props.path} hidden={!sidebarShown} categories={props.categories} />
+                    {!mobile ? <div className="spacer" /> : undefined}
+                    {/* <NoSSR> */}
+                        <div className="content">
+                            {mobile && <>
+                                <div ref={dimmingRef} className={"dimmer" + (sidebarShown ? "" : " hidden")} />
+                                <MobileHeader title={props.name || "Fast shop"} onHamburger={() => {
+                                    setSidebarShown(!sidebarShown)
+                                }} />
+                            </>
+                            }
+                            <ShoppingCartContext.Provider value={shoppingDispatch}>
+                                {props.children}
+                                <ShoppingCart {...shoppingCartItems} />
+                            </ShoppingCartContext.Provider>
+                            <VSpaced style={{ bottom: 0, width: "100%" }}>
+                                <Footer />
+                            </VSpaced>
+                        </div>
+                    {/* </NoSSR> */}
+                </div>
+            </StdErrContext.Provider>
         </ThemeContext.Provider>
     </>
 }

@@ -1,11 +1,36 @@
 import { useContext, useState, useEffect, createContext } from "react"
 import { ThemeContext, LookContext } from "./style"
 
-// export const ErrorMsgContext = createContext<React.Dispatch<string> | null>(null)
+type MsgDispatch = (msg: string) => void
 
-// export const ErrorMsgReducer: Reducer<string?, string> = (state, action) => {
+export function useMessageDispatch(): [string | undefined, MsgDispatch] {
+    let q: string[] = []
+    //FIXME: Queued up messages behave unintentionally
+    let [current, setCurrent] = useState<string | undefined>()
+    const rec = () => {
+        if (q.length > 1) {
+            setCurrent(q[1])
+            q = q.slice(1)
+            setTimeout(rec, 6500)
+        } else {
+            q = []
+            setCurrent(undefined)
+        }
+    }
+    const dis: MsgDispatch = (msg) => {
+        if (q.length == 0) {
+            setCurrent(msg)
+            setTimeout(() => {
+                rec()
+            }, 6500)
+        }
+        q.push(msg)
+    }
 
-// }
+    return [current, dis]
+}
+
+export const StdErrContext = createContext<MsgDispatch | null>(null)
 
 interface ErrorMsgProps {
     prominent?: boolean;
@@ -28,7 +53,7 @@ export const ErrorMsg: React.FC<ErrorMsgProps> = props => {
         setTimeout(() => setShown(true), 500)
     }, [props.msg])
 
-    return props.msg ? <>
+    return <>
         <style jsx>{`
             span {
                 color: ${theme.textColor};
@@ -108,10 +133,10 @@ export const ErrorMsg: React.FC<ErrorMsgProps> = props => {
             }
         `}</style>
         <div className="center">
-            <div className={"container" + (shown ? " shown" : "")}>
+            <div className={"container" + ((shown && props.msg) ? " shown" : "")}>
                 <span>{props.msg}</span>
                 <button className="cross" onClick={() => setShown(false)} />
             </div>
         </div>
-    </> : <></>
+    </>
 }

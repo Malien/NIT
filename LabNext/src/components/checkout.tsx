@@ -5,6 +5,7 @@ import { classes } from "./util";
 import { useMounted, useCancel, useInputState } from "./hooks";
 import { submitPurchase } from "../api/tron";
 import { fromEntries } from "../util/pollyfilling";
+import { StdErrContext } from "./errors";
 
 interface CheckoutPaneProps {
     cart: SCItem[];
@@ -17,6 +18,7 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
     let dispatch = useContext(ShoppingCartContext)
+    let stderr = useContext(StdErrContext)
     let mounted = useMounted()
     let [dismissed, setDismissed] = useState(false)
     let [email, setEmail] = useInputState({value: props.email, pattern: ".+@\\w+\\.\\w+"})
@@ -185,6 +187,9 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                                             return v
                                         })
                                         .then(v => {
+                                            if (stderr) stderr(v.status === "error" 
+                                                ? "Error occured while processing your request" 
+                                                : `Succesfully purcahsed ${props.cart.reduce((acc, cur) => acc + cur.count, 0)} products`)
                                             if (v.status !== "error" && dispatch) {
                                                 dispatch({type: SCActionType.reset, resetState: []})
                                                 setDismissed(true)
