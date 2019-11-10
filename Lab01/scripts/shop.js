@@ -244,7 +244,7 @@ window.onload = function() {
             setCartState(Object.assign({}, stateContainer.current, {shown: false}))
     })
 
-    globalItemDispatch = this.reducer(stateContainer, setCartState, cartItemReducer, cartList)
+    globalItemDispatch = reducer(stateContainer, setCartState, cartItemReducer, cartList)
 
     // globalItemDispatch({
     //         type: "add",
