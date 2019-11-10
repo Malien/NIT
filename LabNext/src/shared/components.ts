@@ -17,3 +17,18 @@ export interface StoreItem {
     bias?: number // Possible user-tracked bias to a product to promote it to the top
     outOfStock?: boolean
 }
+
+export interface TronItem {
+    name: string;
+    id: string;
+    description: string;
+    image_url: string;
+    price: string;
+    special_price: string | null;
+}
+
+export interface TronCategory {
+    id: string;
+    name: string;
+    description: string;
+}

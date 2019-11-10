@@ -24,7 +24,7 @@ export interface Theme {
 export interface Look {
     font: string;
     strongFont: string;
-    stringLineHeight: number;
+    strongLineHeight: number;
     extraLarge: number;
     largeSize: number;
     mediumSize: number;
@@ -74,7 +74,7 @@ export const Dark: Theme = {
 export const Vanila: Look = {
     font: "'Helvetica Neue', 'Helvetica', sans-serif",
     strongFont: "'Libre Baskerville', cursive",
-    stringLineHeight: 1,
+    strongLineHeight: 1,
     extraLarge: 72,
     largeSize: 36,
     mediumSize: 28,

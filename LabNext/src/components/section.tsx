@@ -1,9 +1,9 @@
+import Link from "next/link"
 import React, { useContext } from "react"
 import { StoreItem } from "../shared/components"
+import { GridItem, PlaceholderItem } from "./grid-item"
 import { AdaptiveGrid, GridCell } from "./layout"
-import { GridItem } from "./grid-item"
-import { ThemeContext, LookContext } from "./style"
-import Link from "next/link"
+import { LookContext, ThemeContext } from "./style"
 
 const maxRating = 3.5
 const maxWidth = 3
@@ -33,8 +33,8 @@ export const Section: React.FC<SectionProps> = props => {
             return { width, height, item, rating }
         })
         .sort((a, b) => b.rating - a.rating)
-        .map(({ item, width, height }, index) => 
-            <GridCell key={index} width={width} height={height}>
+        .map(({ item, width, height }) => 
+            <GridCell key={item.id} width={width} height={height}>
                 <GridItem {...item} onBuy={() => {if (props.onBuy) props.onBuy(item)}}/>
             </GridCell>)
 
@@ -76,7 +76,7 @@ export const Section: React.FC<SectionProps> = props => {
                             <a>{props.title}</a>
                         </Link>
                         : <span>{props.title}</span>)}
-                <AdaptiveGrid columnWidth={300} rowHeight={300} responsive>
+                <AdaptiveGrid columnWidth={300} rowHeight={300} responsive placeholder={<PlaceholderItem />}>
                     {items}
                 </AdaptiveGrid>
             </div>

@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useContext, createContext, Reducer, FC } from "react"
+import React, { createContext, FC, Reducer, useContext, useEffect, useReducer, useRef, useState } from "react"
 import { StoreItem } from "../shared/components"
-import { useClick, useKeyDown } from "./hooks"
-import { ThemeContext, LookContext } from "./style"
-import { ThumbList, VSpaced } from "./layout"
-import { defaultImage } from "./common"
 import { toCountNumber } from "../util/numbers"
+import { defaultImage } from "./common"
+import { useClick, useKeyDown } from "./hooks"
+import { ThumbList, VSpaced } from "./layout"
+import { LookContext, ThemeContext } from "./style"
 
 export const SHOPPING_CART_VERSION = 1
 
@@ -277,6 +277,7 @@ export const ShoppingCartItem: React.FC<ShoppingCartItemProps> = props => {
                 grid-column: 1;
                 width: 60px;
                 height: 60px;
+                object-fit: contain;
                 margin: 10px;
                 border-radius: 5px;
                 align-self: center;
@@ -405,4 +406,29 @@ export const CancelButton: FC<CancelButtonProps> = props => {
             <div className="arrow right" />
         </button>
     </>
+}
+
+export function useShoppingCart(): [SCProps, React.Dispatch<SCAction>] {
+    let [shoppingCartItems, dispatch] = useReducer(SCReducer, { shown: false, items: [] })
+
+    useEffect(() => {
+        let version = localStorage.getItem("cart_version")
+        if (!version || !(version == SHOPPING_CART_VERSION as any)) {
+            localStorage.setItem("cart", JSON.stringify({ items: [] }))
+            localStorage.setItem("cart_version", String(SHOPPING_CART_VERSION))
+        } else {
+            let cart = localStorage.getItem("cart")
+            try {
+                if (cart) dispatch({ type: SCActionType.reset, resetState: JSON.parse(cart) })
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(shoppingCartItems.items))
+    }, [shoppingCartItems])
+
+    return [shoppingCartItems, dispatch]
 }

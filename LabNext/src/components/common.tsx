@@ -1,13 +1,13 @@
-import React, { useContext, useState, useEffect, useReducer, useRef } from "react"
-import Link from "next/link"
-import Head from "next/head"
-
-import { ThemeContext, LookContext, Light, Dark } from "./style";
-import { VSpaced, HSpaced, SlideoverPanel } from "./layout";
-import { StoreItem } from "../shared/components";
+import Head from "next/head";
+import Link from "next/link";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { StoreItem, TronCategory } from "../shared/components";
+import { useClick, useKeyDown, useMobileScroll, useWindowBounds } from "./hooks";
+import { NoSSR, VSpaced } from "./layout";
 import { Section, SectionProps } from "./section";
-import { ShoppingCartContext, ShoppingCart, SCActionType, SHOPPING_CART_VERSION, SCReducer } from "./shopping";
-import { useMobileScroll, useWindowBounds, useCancel, useClick, useKeyDown } from "./hooks";
+import { SCActionType, ShoppingCart, ShoppingCartContext, useShoppingCart } from "./shopping";
+import { Dark, Light, LookContext, ThemeContext } from "./style";
+
 
 //TODO: provide default image for product
 export const defaultImage = "";
@@ -79,7 +79,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = props => {
         `}</style>
         <header className={shown ? "" : "hidden"}>
             <button className={props.animated ? "animated" : ""} onClick={() => {
-                console.log("ham")
                 if (props.onHamburger) props.onHamburger()
             }}>
                 <div className="line" />
@@ -97,6 +96,7 @@ interface NavLinkProps {
     label: string;
     href: string;
     selected?: boolean;
+    tooltip?: string;
 }
 export const NavLink: React.FC<NavLinkProps> = props => {
     let theme = useContext(ThemeContext)
@@ -116,6 +116,8 @@ export const NavLink: React.FC<NavLinkProps> = props => {
                 align-items: center;
             }
             span {
+                text-overflow: ellipsis;
+                overflow: hidden;
                 grid-column: 2;
                 color: ${theme.alternateTextColor};
                 font-family: ${look.font};
@@ -125,7 +127,7 @@ export const NavLink: React.FC<NavLinkProps> = props => {
             }
         `}</style>
         <Link href={props.href}>
-            <a>
+            <a title={props.tooltip}>
                 <div>{props.thumb}</div>
                 <span>{props.label}</span>
             </a>
@@ -136,11 +138,19 @@ export const NavLink: React.FC<NavLinkProps> = props => {
 interface SidebarProps {
     path?: string;
     hidden?: boolean;
+    categories: TronCategory[];
 }
 export const Sidebar: React.FC<SidebarProps> = props => {
     let theme = useContext(ThemeContext)
-    // let circle = <div style={{height: 15, width: 15, backgroundColor: theme.alternateTextColor, borderRadius: "50%"}} />
-    let circle = <></>
+    let links = props.categories.map(category =>
+        <NavLink 
+            key={category.id}
+            selected={props.path == `/?category=${category.id}`} 
+            label={category.name} 
+            href={`/?category=${category.id}`}
+            tooltip={category.description} 
+        />
+    )
     return <>
         <style jsx>{`
             .navigation {
@@ -151,30 +161,31 @@ export const Sidebar: React.FC<SidebarProps> = props => {
             header {
                 z-index: 20;
                 position: fixed;
-                width: 250px;
+                width: 270px;
                 height: 100vh;
                 background-color: ${theme.headerColor};
                 box-shadow: ${theme.shadowColor} 5px 0px 8px;
                 transition: transform 0.2s 0s ease-in;
             }
             header.hidden {
-                transform: translateX(-260px);
+                transform: translateX(-280px);
             }
             img {
                 margin: 5%;
                 margin-top: 40px;
             }
-            .spacer {
-                margin-right: 250px;
+
+            @media (min-width: 700px) {
+                header.hidden {
+                    transform: translateX(0);
+                }
             }
         `}</style>
-        <header className={props.hidden ? "hidden" : ""}>
+        <header className={(props.hidden ? " hidden" : "")}>
             <img src="static/assets/SVG/white-logo.svg" className="logo" alt="Shop logo" />
             <div className="navigation">
-                <NavLink selected={props.path == "/"} thumb={circle} label="All Items" href="/" />
-                <NavLink selected={props.path == "/accessories"} thumb={circle} label="Hats" href="/accessories" />
-                <NavLink selected={props.path == "/tops"} thumb={circle} label="Tops" href="/tops" />
-                <NavLink selected={props.path == "/leggins"} thumb={circle} label="Leggins" href="/leggins" />
+                <NavLink selected={props.path == "/"} label="All Items" href="/" />
+                {links}
             </div>
         </header>
     </>
@@ -260,22 +271,26 @@ export const Footer: React.FC = props => {
     </>
 }
 
-export const AppFrame: React.FC<{ path?: string; name?: string }> = props => {
+interface AppFrameProps {
+    path?: string;
+    name?: string;
+    categories: TronCategory[];
+}
+export const AppFrame: React.FC<AppFrameProps> = props => {
     let [theme, setTheme] = useState(Light)
     let { width } = useWindowBounds()
-    let mobile: boolean = (width) ? width < 700 : false;
-    let [hiddenSidebar, setHiddenSidebar] = useState(true)
+    let [mobile, setMobile] = useState((width) ? width < 700 : true);
+    let [sidebarShown, setSidebarShown] = useState(!mobile)
     let dimmingRef = useRef<HTMLDivElement>(null)
     useClick(dimmingRef, () => {
-        if (!hiddenSidebar) setHiddenSidebar(true)
-    }, [hiddenSidebar])
+        if (sidebarShown) setSidebarShown(false)
+    }, [sidebarShown, mobile])
     useKeyDown((e) => {
-        if (!hiddenSidebar && e.key == "Escape") setHiddenSidebar(true)
-    }, [hiddenSidebar])
+        if (mobile && sidebarShown && e.key == "Escape") setSidebarShown(false)
+    }, [sidebarShown, mobile])
 
     useEffect(() => {
-        if (width && width < 700 && !hiddenSidebar) setHiddenSidebar(true)
-        if (width && width > 700 && hiddenSidebar) setHiddenSidebar(false)
+        setMobile((width) ? width < 700 : true)
     }, [width])
     useEffect(() => {
         let match = window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -288,6 +303,8 @@ export const AppFrame: React.FC<{ path?: string; name?: string }> = props => {
         window.matchMedia("(prefers-color-scheme: dark)").addListener(match_func)
         return () => window.matchMedia("(prefers-color-scheme: dark)").removeListener(match_func)
     }, [])
+
+    let [shoppingCartItems, shoppingDispatch] = useShoppingCart()
 
     return <>
         <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:700&display=swap" rel="stylesheet" />
@@ -305,6 +322,7 @@ export const AppFrame: React.FC<{ path?: string; name?: string }> = props => {
             <style jsx>{`
                 .app {
                     display: flex;
+                    position: relative;
                 }
                 .content {
                     width: 100%;
@@ -331,29 +349,33 @@ export const AppFrame: React.FC<{ path?: string; name?: string }> = props => {
                     z-index: 0;
                 }
                 .spacer {
-                    margin-right: 250px;
+                    margin-right: 270px;
                 }
             `}</style>
             <Head>
                 <title>{"Fast Shop" + (props.name ? `: ${props.name}` : "")}</title>
             </Head>
             <div className="app">
-                <Sidebar path={props.path} hidden={hiddenSidebar} />
-                {mobile
-                    ? <>
-                        <div ref={dimmingRef} className={"dimmer" + (hiddenSidebar ? " hidden" : "")} />
-                        <MobileHeader title={props.name || "Fast shop"} onHamburger={() => {
-                            setHiddenSidebar(!hiddenSidebar)
-                        }} />
-                    </>
-                    : <div className="spacer" />
-                }
-                <div className="content">
-                    {props.children}
-                    <VSpaced style={{ bottom: 0, width: "100%" }}>
-                        <Footer />
-                    </VSpaced>
-                </div>
+                <Sidebar path={props.path} hidden={!sidebarShown} categories={props.categories} />
+                {!mobile ? <div className="spacer" /> : undefined}
+                <NoSSR>
+                    <div className="content">
+                        {mobile && <>
+                            <div ref={dimmingRef} className={"dimmer" + (sidebarShown ? "" : " hidden")} />
+                            <MobileHeader title={props.name || "Fast shop"} onHamburger={() => {
+                                setSidebarShown(!sidebarShown)
+                            }} />
+                        </>
+                        }
+                        <ShoppingCartContext.Provider value={shoppingDispatch}>
+                            {props.children}
+                            <ShoppingCart {...shoppingCartItems} />
+                        </ShoppingCartContext.Provider>
+                        <VSpaced style={{ bottom: 0, width: "100%" }}>
+                            <Footer />
+                        </VSpaced>
+                    </div>
+                </NoSSR>
             </div>
         </ThemeContext.Provider>
     </>
@@ -364,41 +386,19 @@ interface StorefrontProps {
     items?: StoreItem[];
 }
 export const Storefront: React.FC<StorefrontProps> = props => {
-    let [shoppingCartItems, dispatch] = useReducer(SCReducer, { shown: false, items: [] })
+    let dispatch = useContext(ShoppingCartContext)
 
-    useEffect(() => {
-        let version = localStorage.getItem("cart_version")
-        if (!version || !(version == SHOPPING_CART_VERSION as any)) {
-            localStorage.setItem("cart", JSON.stringify({ items: [] }))
-            localStorage.setItem("cart_version", String(SHOPPING_CART_VERSION))
-        } else {
-            let cart = localStorage.getItem("cart")
-            try {
-                if (cart) dispatch({ type: SCActionType.reset, resetState: JSON.parse(cart) })
-            } catch (e) {
-                console.error(e)
-            }
-        }
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(shoppingCartItems.items))
-    }, [shoppingCartItems])
-
-    let sections: JSX.Element[] = []
     const buyHandler = (item: StoreItem) => {
-        dispatch({ type: SCActionType.add, id: item.id, count: 1, fallbackItem: item })
+        if (dispatch) dispatch({ type: SCActionType.add, id: item.id, count: 1, fallbackItem: item })
     }
+    let sections: JSX.Element[] = []
     if (props.items) {
         sections.push(<Section items={props.items} key={-1} onBuy={buyHandler} />)
     }
     if (props.sections) {
-        sections.push(...props.sections.map((props, index) => <Section {...props} key={index} onBuy={buyHandler} />))
+        sections.push(...props.sections.map((sprops, index) => <Section {...sprops} key={index} onBuy={buyHandler} />))
     }
-    return <ShoppingCartContext.Provider value={dispatch}>
-        {sections}
-        <ShoppingCart {...shoppingCartItems} />
-    </ShoppingCartContext.Provider>
+    return <>{sections}</>
 }
 
 interface ErrorMsgProps {

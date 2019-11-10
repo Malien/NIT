@@ -1,6 +1,6 @@
-import React, { FunctionComponent, Children, useState, useEffect, useRef, useMemo, useContext } from "react"
-import { useBounds, useKeyDown, useCancel } from "./hooks"
+import React, { Children, FunctionComponent, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { ExtendableMat } from "../util/structures"
+import { useBounds, useKeyDown, useMounted } from "./hooks"
 import { ThemeContext } from "./style"
 
 interface ThumbListProps {
@@ -137,22 +137,39 @@ interface AdaptiveGridProps {
     rowHeight: number;
     children: React.ReactElement<GridCellProps>[];
     responsive?: boolean;
+    placeholder?: JSX.Element;
 }
 export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
     let gridRef = useRef<HTMLDivElement>(null)
     let { width } = useBounds(gridRef, { height: 0, width: 0 })
-    let columns = Math.floor(width / props.columnWidth)
+    let mounted = useMounted()
+    let columns = Math.max(Math.floor(width / props.columnWidth), 1)
 
     let transformed = useMemo(() => {
         let placemap = new ExtendableMat(columns, false)
 
+        if (!mounted) {
+            if (props.placeholder) {
+                let items: JSX.Element[] = []
+                for (let i=0; i<Children.count(props.children); ++i) {
+                    items.push(<div key={i} style={
+                        {
+                            gridRow: `span 1`,
+                            gridColumn: `span 1`,
+                            height: props.rowHeight
+                        }
+                    }>{props.placeholder}</div>)
+                }
+                return items
+            } else return []
+        }
         return React.Children.map(props.children, (node: React.ReactElement<GridCellProps>, index) => {
             let h = Math.min(node.props.height, columns)
             let w = Math.min(node.props.width, columns)
             if (props.responsive && columns == 1) h *= 1.5;
 
             return {
-                element: <div key={index} style={
+                element: <div key={node.key || index} style={
                     {
                         gridRow: `span ${h}`,
                         gridColumn: `span ${w}`,
@@ -191,15 +208,17 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
                 }
             }).sort((a, b) => a.index - b.index)
             .map(v => v.element)
-    }, [columns, props.children])
+    }, [columns, props.children, mounted])
 
+    let rows = Math.ceil(transformed.length / columns)
+    let cellHeight = (props.responsive && columns == 1) ? props.rowHeight * 1.5 : props.rowHeight
     return <>
         <style jsx>{`
             .grid {
                 width: 100%;
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(${props.columnWidth}px, 1fr));
-                grid-template-rows: repeat(auto-fit, ${(props.responsive && columns == 1) ? props.rowHeight * 1.5 : props.rowHeight}px);
+                grid-template-rows: repeat(${rows}, ${cellHeight}px);
             }
         `}</style>
         <div className="grid" ref={gridRef}>
@@ -208,87 +227,12 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
     </>
 }
 
-interface ShadowedProps {
-    color: string;
-    dx?: string;
-    dy?: string;
-    animationFunc?: string;
-    spread?: string;
-    distance?: string;
-    duration?: string;
-    delay?: string;
-    shown?: boolean;
-}
-export const Shadowed: React.FC<ShadowedProps> = ({ color, children, dx = 0, dy = 0, animationFunc = "", spread = 0, distance = 0, duration = 0, delay = 0, shown = true }) => <>
-    <style jsx>{`
-        div::before {
-            content: "";
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            width: 0;
-            display: block;
-            box-shadow: ${color} ${dx} ${dy} ${spread} ${distance};
-            transition: opacity ${duration} ${delay} ${animationFunc};
-            opacity: ${shown ? 1 : 0};
-        }
-    `}</style>
-    <div>
-        {children}
-    </div>
-</>
 
-interface SlideoverPanelProps {
-    shown: boolean;
-    fixed: boolean;
-    onDismiss?: () => void;
+interface NoSSRProps {
+    fallback?: JSX.Element
 }
-export const SlideoverPanel: React.FC<SlideoverPanelProps> = props => {
-    let theme = useContext(ThemeContext)
-    let ref = useRef<HTMLDivElement>(null)
-    let dimmerRef = useRef<HTMLDivElement>(null)
-    useCancel(dimmerRef, () => {
-        if (props.shown && props.onDismiss) props.onDismiss()
-    }, [props.shown, props.onDismiss])
-    let { width } = useBounds(ref)
 
-    return <>
-        <style jsx>{`
-            .sheet {
-                transition: transform 0.2s 0s ease-in;
-                transform: translateX(${props.shown ? 0 : (width ? -width : 0)}px);
-            }
-            .fixed {
-                z-index: ${props.shown ? 30 : 30};
-                position: fixed;
-            }
-            .dimmer {
-                width: 100vw;
-                height: 100vh;
-                position: fixed;
-                background-color: ${theme.dimmingColor};
-                transition: opacity 0.2s 0s ease-in;
-                z-index: 20;
-                opacity: 1;
-            }
-            .dimmer.hidden {
-                z-index: 0;
-                opacity: 0;
-            }
-        `}</style>
-        <div ref={dimmerRef} className={"dimmer" + (props.shown ? "" : " hidden")} />
-        {props.fixed
-            ? <HSpaced style={{ position: "fixed" }}>
-                {<Shadowed color={theme.shadowColor} dx="3px" dy="3px" spread="10px" distance="3px" duration="0.2s" shown={props.shown}>
-                    {props.children}
-                </Shadowed>}
-            </HSpaced>
-            : <div className="fixed">
-                <Shadowed color={theme.shadowColor} dx="3px" dy="3px" spread="10px" distance="3px" duration="0.2s" shown={props.shown}>
-                        {props.children}
-                </Shadowed>
-            </div>
-        }
-    </>
+export const NoSSR: React.FC<NoSSRProps> = ({children, fallback = null}) => {
+    let mounted = useMounted()
+    return <>{mounted ? children : fallback}</>
 }
