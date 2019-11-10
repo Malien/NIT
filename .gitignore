@@ -5,3 +5,5 @@ tmp
 node_modules
 .next
 next-env.d.ts
+
+LabNext/out
