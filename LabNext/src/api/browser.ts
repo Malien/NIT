@@ -12,7 +12,16 @@ interface ErrFlag {
 }
 type FlaggedItemResponse<R> = ItemResponse<R> & ErrFlag
 type keyval<T> = [string, T]
+/**
+ * Old API fetch used for getting static item files in the broser.
+ * @param req object with name: path pairs coresponding to resulting name: object fetched object
+ */
 export function fetchItems<T>(req: ItemRequest<T>): Promise<ItemResponse<T>>
+/**
+ * Old API fetch used for getting static item files in the broser. If an error enountered, result includes err flag
+ * @param req object with name: path pairs coresponding to resulting name: object fetched object
+ * @param autocatch If error encountered, this value will be set as a result
+ */
 export function fetchItems<T>(req: ItemRequest<T>, autocatch: StoreItem[]): Promise<FlaggedItemResponse<T>>
 export function fetchItems<T>(req: ItemRequest<T>, autocatch?: StoreItem[]) {
     let promise = Promise.all(Object.entries(req)

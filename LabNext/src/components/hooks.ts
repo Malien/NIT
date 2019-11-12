@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react"
 import ResizeObserver from "resize-observer-polyfill"
-import { string } from "prop-types"
 
 export interface Bounds {
     width: number;
     height: number;
 }
 
+/**
+ * calls callback when key is pressed
+ * @param listener responds to keyboard event
+ * @param deps optional React dependancies @see https://reactjs.org/docs/hooks-effect.html
+ */
 export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => void, deps: any[] = []) {
     useEffect(() => {
         document.addEventListener("keydown", listener)
@@ -14,6 +18,12 @@ export function useKeyDown(listener: (this: Document, event: KeyboardEvent) => v
     }, deps)
 }
 
+/**
+ * 
+ * @param ref reference to an element that should dismiss current *thing*
+ * @param cb callback that is called upon cancelling
+ * @param deps optional React dependancies @see https://reactjs.org/docs/hooks-effect.html
+ */
 export function useCancel<T extends HTMLElement>(ref: React.RefObject<T>, cb: () => void, deps?: any[]) {
     useEffect(() => {
         const mfunc = () => {
@@ -31,6 +41,11 @@ export function useCancel<T extends HTMLElement>(ref: React.RefObject<T>, cb: ()
     }, deps ? [...deps] : undefined)
 }
 
+/**
+ * Setups listener to an element resize
+ * @param ref React reference to an object to be measured
+ * @param cb callback that is called upon element resize
+ */
 export function useResize<T extends HTMLElement>(ref: React.RefObject<T> | T, cb: (bounds: Bounds, element: T) => void) {
     useEffect(() => {
         let el: T | null
@@ -53,6 +68,11 @@ export function useResize<T extends HTMLElement>(ref: React.RefObject<T> | T, cb
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaultVal: Bounds): Bounds;
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>): OptionalBounds;
 
+/**
+ * Returns dyncamic element bounds. If no defaultValue is provided, bounds can contain undefined width and height
+ * @param ref React reference to an object to be measured
+ * @param defaultVal default value of bounds to be used without null-checks
+ */
 export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaultVal?: Bounds) {
     let [bounds, setBounds] = useState<Bounds | OptionalBounds>(defaultVal || {})
     useEffect(() => {
@@ -80,6 +100,12 @@ export function useBounds<T extends HTMLElement>(ref: React.RefObject<T>, defaul
 export function useBoundsThrottled<T extends HTMLElement>(ref: React.RefObject<T>, throtlepx: number, defaultVal: Bounds): Bounds;
 export function useBoundsThrottled<T extends HTMLElement>(ref: React.RefObject<T>, throtlepx: number): OptionalBounds;
 
+/**
+ * Same as useBounds, but updates only when resizing of an element became bigger than throttlepx
+ * @param ref React reference to an object to be measured
+ * @param throtlepx amount of size change pixels ignored until update is called
+ * @param defaultVal default value of bounds to be used without null-checks
+ */
 export function useBoundsThrottled<T extends HTMLElement>(ref: React.RefObject<T>, throtlepx: number, defaultVal?: Bounds): OptionalBounds | Bounds {
     let [bounds, setBounds] = useState<Bounds | OptionalBounds>(defaultVal || {})
     useEffect(() => {
@@ -112,6 +138,11 @@ export function useBoundsThrottled<T extends HTMLElement>(ref: React.RefObject<T
     return bounds
 }
 
+/**
+ * Returns whether or not pointer is inside the element
+ * @param ref element or reference to it to be observer
+ * @param onEnter optional callback to be called upon pointer entering element
+ */
 export function useHover<T extends HTMLElement>(ref: React.RefObject<T> | T | undefined, onEnter?: () => void) {
     let [hovered, setHovered] = useState(false)
     useEffect(() => {
@@ -139,6 +170,12 @@ export function useHover<T extends HTMLElement>(ref: React.RefObject<T> | T | un
     return hovered
 }
 
+/**
+ * Attaches click event listener to an element
+ * @param ref React reference to an object to be acted upon
+ * @param cb click event callback
+ * @param deps optional React dependancies @see https://reactjs.org/docs/hooks-effect.html
+ */
 export function useClick<T extends HTMLElement>(ref: React.RefObject<T>, cb: (event: MouseEvent) => void, deps: any[] = []) {
     useEffect(() => {
         let obj = ref.current
@@ -150,6 +187,13 @@ export function useClick<T extends HTMLElement>(ref: React.RefObject<T>, cb: (ev
 }
 
 const dscrollTrigger = 20
+/**
+ * Returns a boolean that tells whether element is suitable to be shown on mobile. 
+ * Elemet is thought to revealed when user scrolls up, or reached offset from the top.
+ * Element is thought to hide when user scrolls down fast enough.
+ * @param initial whether element is initally suitable for mobile displayment. @default true
+ * @param offsetShown offset from top of the screen where element is shown no matter the scroll @default 0
+ */
 export function useMobileScroll(initial: boolean = true, offsetShown: number = 0) {
     let [shown, setShown] = useState(initial)
     let prevScroll = 0
@@ -173,6 +217,11 @@ interface OptionalBounds {
     width?: number;
     height?: number
 }
+/**
+ * Get window sizes, and upade upon resize
+ * @param deps optional React dependancies @see https://reactjs.org/docs/hooks-effect.html
+ * @returns window bounds
+ */
 export function useWindowBounds(deps: any[] = []) {
     let initial = (typeof window !== "undefined") ? { width: window.innerWidth, height: window.innerHeight } : {}
     let [bounds, setBounds] = useState<OptionalBounds>(initial)
@@ -187,6 +236,9 @@ export function useWindowBounds(deps: any[] = []) {
     return bounds
 }
 
+/**
+ * @returns true if component is mounted to the DOM
+ */
 export function useMounted() {
     let [mounted, setMounted] = useState(false)
     useEffect(() => setMounted(true), [])
@@ -200,7 +252,17 @@ interface ValidatedInputState extends PartialInputState{
     valid: boolean;
 }
 type InputState = PartialInputState | ValidatedInputState
+/**
+ * Setups state for an input field. With validation
+ * @param params value: initial value of a field, pattern: pattern to validate the input
+ * @returns object with current value, and field validity
+ */
 export function useInputState(params: {value?: string, pattern: RegExp | string}) : [ValidatedInputState, (value: string) => void]
+/**
+ * Setups state for an input field. Without validation
+ * @param params value: initial value of a field
+ * @returns object with current value
+ */
 export function useInputState(params: {value?: string}) : [PartialInputState, (value: string) => void]
 
 export function useInputState({value, pattern}: {value?: string, pattern?: RegExp | string}) : [InputState, (value: string) => void] {

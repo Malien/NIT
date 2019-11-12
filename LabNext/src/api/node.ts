@@ -10,6 +10,11 @@ export class FetchResponse {
     }
 }
 
+/**
+ * Pollyfill for browsers fetch API.
+ * Very barebones and limited only to simple GET requests
+ * @param url url to fetch from
+ */
 export function fetch(url: string): Promise<FetchResponse> {
     return new Promise((resolve, reject) => {
         get(url, (res) => {

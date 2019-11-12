@@ -11,6 +11,13 @@ interface LegginsPageProps {
     category?: TronCategory;
     err?: boolean;
 }
+/**
+ * Page responsible for displaying product grid page. Hosted at /product
+ * @param item item to be displayd
+ * @param categoris categoris of the items
+ * @param category current selected category
+ * @param err if true error message is displayed
+ */
 const StorefrontPage: NextPage<LegginsPageProps> = props =>
     <AppFrame
         path={props.category ? `/?category=${props.category.id}` : "/"}
@@ -21,9 +28,15 @@ const StorefrontPage: NextPage<LegginsPageProps> = props =>
         <Storefront items={props.items} />
     </AppFrame>
 
+/**
+ * @method Is called either on server on initial load, or on client if is navigated to.
+ * Used to fetch initial props for page, such as items and categories.
+ * @param query contains parsed page querry path extension. Used to pinpoint what should be fetched.
+ */
 StorefrontPage.getInitialProps = async ({ req, query }) => {
     let categoryQuery = query.category as string
     if (req) {
+        // If req is set, than we are runnig in the server environment
         try {
             let [items, categories] = await Promise.all([
                 fetchItemsNode(categoryQuery).then(toStoreItem),

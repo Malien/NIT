@@ -2,9 +2,12 @@ import { createContext } from "react";
 
 type kind = "dark" | "light"
 
+/**
+ * Colors defined to be used by current theme
+ */
 export interface Theme {
     mobileHeaderColor: any;
-    kind: kind;
+    kind: kind; // Used to respect browser theme settting
     headerColor: string;
     headerSubcolor: string;
     textColor: string;
@@ -21,6 +24,9 @@ export interface Theme {
     dimmingColor: string;
 }
 
+/**
+ * Styles, such as fonts, and font-sizes that define the look of application
+ */
 export interface Look {
     font: string;
     strongFont: string;
@@ -83,5 +89,6 @@ export const Vanila: Look = {
     boldWeight: 600
 }
 
+// React contexts used to acquire currently set theme inside components on demand, with state updates 'n stuff
 export const ThemeContext = createContext(Light)
 export const LookContext = createContext(Vanila)

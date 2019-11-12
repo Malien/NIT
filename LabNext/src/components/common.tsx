@@ -17,6 +17,10 @@ interface MobileHeaderProps {
     title: string;
     animated?: boolean;
 }
+/**
+ * Header for mobile devices to invode sidebar
+ * @param props title and hamburger menu click handler
+ */
 export const MobileHeader: React.FC<MobileHeaderProps> = props => {
     let shown = useMobileScroll(true, 50)
     let theme = useContext(ThemeContext)
@@ -100,6 +104,10 @@ interface NavLinkProps {
     selected?: boolean;
     tooltip?: string;
 }
+/**
+ * Sidebar link used to navigate between pages
+ * @param props optional thumbnail, label, href, whether is selected and optional tooltip
+ */
 export const NavLink: React.FC<NavLinkProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
@@ -142,6 +150,12 @@ interface SidebarProps {
     hidden?: boolean;
     categories: TronCategory[];
 }
+/**
+ * Sidebar that contains Navigation 'n stuff
+ * @param path optional -- current page path (without querry)
+ * @param hidden whether hidden or not (for mobile use)
+ * @param categories categories of products (will generate links that will navigate to index/?category=id)
+ */
 export const Sidebar: React.FC<SidebarProps> = props => {
     let theme = useContext(ThemeContext)
     let links = props.categories.map(category =>
@@ -193,6 +207,9 @@ export const Sidebar: React.FC<SidebarProps> = props => {
     </>
 }
 
+/**
+ * Just a site footer
+ */
 export const Footer: React.FC = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
@@ -278,6 +295,12 @@ interface AppFrameProps {
     name?: string;
     categories: TronCategory[];
 }
+/**
+ * Main component that is responsible of common things, such as headers, footer, cart and message handling, and other common stuff between the pages
+ * @param path optional -- used to highlight current path link in the sidebar
+ * @param name used to display in the document title as well as in the mobile neader @default "Fast Shop"
+ * @param categories that are probably fetched from the server, used to display them in the sidebar
+ */
 export const AppFrame: React.FC<AppFrameProps> = props => {
     let [theme, setTheme] = useState(Light)
     let { width } = useWindowBounds()
@@ -392,6 +415,11 @@ interface StorefrontProps {
     sections?: SectionProps[];
     items?: StoreItem[];
 }
+/**
+ * Used to display and organize item sections. Formerly responsible for shopping cart context maangement
+ * @param items the top section with no title
+ * @param sections other sections with additional props
+ */
 export const Storefront: React.FC<StorefrontProps> = props => {
     let dispatch = useContext(ShoppingCartContext)
 

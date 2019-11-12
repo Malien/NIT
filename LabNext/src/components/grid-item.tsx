@@ -6,6 +6,11 @@ import { LookContext, ThemeContext } from "./style"
 import { classes } from "./util"
 import Link from "next/link"
 
+/**
+ * Splits item name by space in two, so that second part is longer than the first one
+ * @param name name of an item
+ * @returns tuple of name split in two
+ */
 export function splitName(name: string): [string, string] {
     let words = name.split(" ")
     if (words.length < 2) return ["", name]
@@ -22,6 +27,10 @@ const MAX_RATING = 5
 interface StarRatingProps {
     rating: number;
 }
+/**
+ * Renders star rating
+ * @param props rating from 0 to 5
+ */
 export const StarRating: React.FC<StarRatingProps> = props => {
     let out: JSX.Element[] = []
     let i
@@ -62,6 +71,10 @@ interface GridItemElements {
     scroll?: HTMLDivElement;
 }
 
+/**
+ * Renders item representation to be put into storefront grid view
+ * @param props StoreItem with optional onBuy handler
+ */
 export const GridItem: React.FC<GridItemProps> = props => {
     // let [curImg, setCurImg] = useState(props.previews[0])
     let theme = useContext(ThemeContext)
@@ -226,6 +239,9 @@ export const GridItem: React.FC<GridItemProps> = props => {
     </>
 }
 
+/**
+ * Placeholder GridItem to be used when GridItem view is temporary unavailable
+ */
 export const PlaceholderItem: React.FC = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)

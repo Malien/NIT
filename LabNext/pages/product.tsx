@@ -11,6 +11,12 @@ interface ProductPageProps {
     categories: TronCategory[];
     err?: boolean;
 }
+/**
+ * Page responsible for displaying full-sized product description. Hosted at /product
+ * @param item item to be displayd
+ * @param categoris categoris of the items
+ * @param err if true error message is displayed
+ */
 const ProductPage: NextPage<ProductPageProps> = ({ item, categories, err }) => {
     let name = (item) ? item.name : "No item found"
     return <AppFrame
@@ -22,9 +28,15 @@ const ProductPage: NextPage<ProductPageProps> = ({ item, categories, err }) => {
     </AppFrame>
 }
 
+/**
+ * @method Is called either on server on initial load, or on client if is navigated to.
+ * Used to fetch initial props for page, such as items and categories.
+ * @param query contains parsed page querry path extension. Used to pinpoint what should be fetched
+ */
 ProductPage.getInitialProps = async ({ req, query }) => {
     let id = query.id as string
     if (req) {
+        // If req is set, than we are runnig in the server environment
         try {
             if (!id) return fetchCategoriesNode().then(categories => ({ categories }))
             let [item, categories] = await Promise.all([

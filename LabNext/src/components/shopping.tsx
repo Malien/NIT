@@ -8,10 +8,17 @@ import { LookContext, ThemeContext } from "./style"
 import { CheckoutPane } from "./checkout"
 import { classes } from "./util"
 
+// If products change or new version is deployed, should probably change cart version to invalidate user's shopping cart
 export const SHOPPING_CART_VERSION = 1
 
+// React context used to dispactch deep updates of cart contents inside components with state update 'n stuff
 export const ShoppingCartContext = createContext<React.Dispatch<SCAction> | null>(null)
 
+/**
+ * Default reducer for shopping cart actions. Used to determine new cart state, upon applying specified action
+ * @param state current state of cart
+ * @param action action to be applied to cart @see SCAction
+ */
 export const SCReducer: Reducer<SCProps, SCAction> = (state, action) => {
     const getIndex = () => {
         let index = (typeof action.id == "number") ? action.id : state.items.findIndex(item => item.id === action.id)
@@ -66,6 +73,10 @@ export interface SCProps {
     items: SCItem[];
     shown: boolean;
 }
+/**
+ * Component responsible for rendering cart contents, as well as to manage it
+ * @param props current cart items, and whether it is expanded or not
+ */
 export const ShoppingCart: React.FC<SCProps> = props => {
     let ref = useRef<HTMLDivElement>(null)
     let dimmerRef = useRef<HTMLDivElement>(null)
@@ -238,6 +249,10 @@ interface SCItemViewProps extends StoreItem {
     onChange: (val: number) => void;
     onSubmit: (val?: number) => void;
 }
+/**
+ * Component used to render StoreItem into shopping cart
+ * @param props StoreItem that is displayed to user with count, and user interactions callback to change count
+ */
 export const SCItemView: React.FC<SCItemViewProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
@@ -319,6 +334,10 @@ export const SCItemView: React.FC<SCItemViewProps> = props => {
 interface CancelButtonProps {
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
+/**
+ * Just a red button, with shadow, and X inside it. Should be pretty fast as it uses only opacity to be animated
+ * @param props Click handler
+ */
 export const CancelButton: FC<CancelButtonProps> = props => {
     let theme = useContext(ThemeContext)
     return <>
@@ -432,6 +451,9 @@ export const SCItemList: React.FC<SCItemListProps> = props => {
     </>
 }
 
+/**
+ * Hook that creates and setups localStorage saved shopping cart state, and state-changing dispatch function
+ */
 export function useShoppingCart(): [SCProps, React.Dispatch<SCAction>] {
     let [shoppingCartItems, dispatch] = useReducer(SCReducer, { shown: false, items: [] })
 

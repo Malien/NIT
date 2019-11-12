@@ -1,12 +1,11 @@
 import { useContext, useState, useRef } from "react";
 import { ThemeContext, LookContext } from "./style";
-import { SCItem, SCItemList, ShoppingCartContext, SCActionType } from "./shopping";
+import { SCItem, SCItemList, ShoppingCartContext, SCActionType } from "./shopping"; // This is probably circular depencancy
 import { classes } from "./util";
 import { useMounted, useCancel, useInputState } from "./hooks";
 import { submitPurchase } from "../api/tron";
 import { fromEntries } from "../util/pollyfilling";
 import { StdErrContext } from "./errors";
-import { BuyButton } from "./grid-item";
 
 interface CheckoutPaneProps {
     cart: SCItem[];
@@ -15,6 +14,14 @@ interface CheckoutPaneProps {
     name?: string;
     phone?: string;
 }
+/**
+ * Pop over pane that is used to confirm users purchase
+ * @param cart shopping cart items
+ * @param onDismiss? pane dismiss handler
+ * @param email? default user email
+ * @param name? default user name
+ * @param phone? default user phone
+ */
 export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)

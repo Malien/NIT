@@ -16,6 +16,11 @@ export interface SectionProps {
     onBuy?: (item: StoreItem) => void;
 }
 
+/**
+ * Renders section filled with items in a grid, with sizes, and priorities 
+ * determined automatically using rating, discount amount (if present) and bias
+ * @param props Items to be displayed, title of section, link upon click on category title and buy handler for priducts inside
+ */
 export const Section: React.FC<SectionProps> = props => {
     let items = props.items
         .map(item => {

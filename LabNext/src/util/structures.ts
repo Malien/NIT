@@ -5,7 +5,7 @@ const right = i => (i + 1) << 1;
 
 type cmp<T> = (a: T, b: T) => boolean
 
-// Not used anywhere, should probably remove from file
+/** Not used anywhere, should probably remove from file */ 
 export class PriorityQueue<T> {
     _heap: T[];
     _comparator: cmp<T>;
@@ -71,10 +71,20 @@ export class PriorityQueue<T> {
     }
 }
 
+/**
+ * Matrix that extends itself when addressing non-existant rows
+ * Uses ES2015 Proxy for my own convinience, can't be pollyfilled, except for using methods, which is so 2004 😒
+ * @template T type of values inside matrix
+ */
 export class ExtendableMat<T> {
     arr: T[][] = []
     len: number
     defaultVal: T
+    /**
+     * Constructor for ExtendableMat
+     * @param len amount of columns in matrix
+     * @param defaultVal value to be used to extend matrix with, upon need
+     */
     constructor(len: number, defaultVal: T) {
         this.len = len
         this.defaultVal = defaultVal

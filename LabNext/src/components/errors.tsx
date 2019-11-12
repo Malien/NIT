@@ -3,6 +3,10 @@ import { ThemeContext, LookContext } from "./style"
 
 type MsgDispatch = (msg: string) => void
 
+/**
+ * Hook that setups user message dispatch
+ * @returns Pair of message to be displayed and message dispatch function
+ */
 export function useMessageDispatch(): [string | undefined, MsgDispatch] {
     let q: string[] = []
     //FIXME: Queued up messages behave unintentionally
@@ -30,12 +34,17 @@ export function useMessageDispatch(): [string | undefined, MsgDispatch] {
     return [current, dis]
 }
 
+// Ract context to show user message, triggered deep withing the app
 export const StdErrContext = createContext<MsgDispatch | null>(null)
 
 interface ErrorMsgProps {
     prominent?: boolean;
     msg?: string;
 }
+/**
+ * Notification components used to notify user something of importance
+ * @param props whether shouldn't dismiss after a while (broken with automatic dispatch) and message itself
+ */
 export const ErrorMsg: React.FC<ErrorMsgProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)

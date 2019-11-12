@@ -9,6 +9,10 @@ interface ThumbListProps {
     notop?: boolean;
 }
 
+/**
+ * Aligned list with space dedicated to thumnail of and item
+ * @param param0 columns in a list, size of thumbnail column and whether top divider should be included.
+ */
 export const ThumbList: FunctionComponent<ThumbListProps> = ({ children, columns, thumbSize, notop }) => {
     let theme = useContext(ThemeContext)
     let divider = <div style={{
@@ -37,6 +41,10 @@ interface LoadingAreaProps {
     loaded: boolean;
 }
 
+/**
+ * Component that came here, just because I migrated this file from another project of mine
+ * @param props Wheather or not should display children
+ */
 export const LoadingArea: React.FunctionComponent<LoadingAreaProps> = props => <>{props.loaded ? props.children : <div className="layout-loading" />}</>
 LoadingArea.displayName = "LoadingArea"
 
@@ -44,6 +52,10 @@ interface DropdownProps {
     title?: string;
 }
 
+/**
+ * Dropdown components that came here, just because I migrated this file from another project of mine
+ * @param props title of dropdown
+ */
 export const Dropdown: FunctionComponent<DropdownProps> = props => {
     let [hidden, setHidden] = useState(true)
     let dropdownRef = useRef<HTMLDivElement>(null)
@@ -93,6 +105,10 @@ Dropdown.displayName = "Dropdown"
 interface VSpacedProps {
     style: React.CSSProperties;
 }
+/**
+ * Creates a dynamically sized div with top margin coresponging to encapsulated elements height
+ * @param props additional styles for the element to be spaced
+ */
 export const VSpaced: FunctionComponent<VSpacedProps> = props => {
     let elRef = useRef<HTMLDivElement>(null)
     let { height } = useBounds(elRef, { width: 0, height: 0 })
@@ -111,6 +127,10 @@ export const VSpaced: FunctionComponent<VSpacedProps> = props => {
 interface HSpacedProps {
     style: React.CSSProperties;
 }
+/**
+ * Creates a dynamically sized div with right margin coresponging to encapsulated elements width
+ * @param props additional styles for the element to be spaced
+ */
 export const HSpaced: FunctionComponent<HSpacedProps> = props => {
     let elRef = useRef<HTMLDivElement>(null)
     let { width } = useBounds(elRef, { width: 0, height: 0 })
@@ -130,6 +150,10 @@ interface GridCellProps {
     width: number;
     height: number;
 }
+/**
+ * Cell for Adaptive grid with few props to determine it's width and height
+ * @param props width and height of a cell (in grid columns, rows span)
+ */
 export const GridCell: React.FC<GridCellProps> = props => <>{props.children}</>
 
 interface AdaptiveGridProps {
@@ -139,6 +163,15 @@ interface AdaptiveGridProps {
     responsive?: boolean;
     placeholder?: JSX.Element;
 }
+/**
+ * Adaptive grid that dynamicaly positions elements to fit all possible gaps that could occur
+ * Responsible for that marvelous grid degin of front page
+ * @param columnWidth width of a grid column, 
+ * @param rowHeight height of a grid row, 
+ * @param placeholder placeholder for when screen size is being determined, and positioning is not yet calculated 
+ * @param responsive whether or not 
+ * @children can only be those who have width and height as their props
+ */
 export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
     let gridRef = useRef<HTMLDivElement>(null)
     let { width } = useBounds(gridRef, { height: 0, width: 0 })
@@ -231,7 +264,10 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
 interface NoSSRProps {
     fallback?: JSX.Element
 }
-
+/**
+ * Disables server-side rendering for components inside. Can render optional fallback
+ * @param param0 fallback to be rendered
+ */
 export const NoSSR: React.FC<NoSSRProps> = ({children, fallback = null}) => {
     let mounted = useMounted()
     return <>{mounted ? children : fallback}</>

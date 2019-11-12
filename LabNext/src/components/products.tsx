@@ -4,6 +4,10 @@ import { BuyButton, splitName, StarRating } from "./grid-item";
 import { SCActionType, ShoppingCartContext } from "./shopping";
 import { LookContext, ThemeContext } from "./style";
 
+/**
+ * Displays store item in a full-page kind of style.
+ * @param props Just a StoreItem to be displayed
+ */
 export const ProductView: React.FC<StoreItem> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
@@ -70,6 +74,10 @@ interface ProductPreviewProps {
     image: string;
     alt?: string;
 }
+/**
+ * Header portion of ProductView used to display single product image / prewied
+ * @param props image url, and optional alt img atribute
+ */
 export const ProductPreview: React.FC<ProductPreviewProps> = props => {
     let theme = useContext(ThemeContext)
     return <>
