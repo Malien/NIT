@@ -387,7 +387,7 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
                 <div className="app">
                     <Sidebar path={props.path} hidden={!sidebarShown} categories={props.categories} />
                     {!mobile ? <div className="spacer" /> : undefined}
-                    {/* <NoSSR> */}
+                    <NoSSR>
                         <div className="content">
                             {mobile && <>
                                 <div ref={dimmingRef} className={"dimmer" + (sidebarShown ? "" : " hidden")} />
@@ -404,7 +404,7 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
                                 <Footer />
                             </VSpaced>
                         </div>
-                    {/* </NoSSR> */}
+                    </NoSSR>
                 </div>
             </StdErrContext.Provider>
         </ThemeContext.Provider>
