@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { StoreItem } from "../shared/components"
+import { StoreItem, deploymentPrefix } from "../shared/components"
 import { easeInSine, scrollTo } from "./animate"
 import { useBounds, useHover } from "./hooks"
 import { LookContext, ThemeContext } from "./style"
@@ -175,7 +175,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
                 text-shadow: 0px 0px 5px #000000aa;
             }
             .desc {
-                /* font-family: ${look.font} */
+                font-family: 'Lora', serif;
                 font-size: ${look.smallSize}px;
                 /*color: ${theme.textSubcolor};*/
             }
@@ -220,7 +220,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
             <div className={classes({"scroll": true, "animated": inited})} ref={scrollRef}>
                 <div className="info" ref={infoRef}>
                     <div className="title" ref={nameRef}>
-                        <Link href={`/product?id=${props.id}`}>
+                        <Link href={`${deploymentPrefix}/product?id=${props.id}`}>
                             <a>{name1}<br/>{name2}</a>
                         </Link>
                     </div>

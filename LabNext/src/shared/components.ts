@@ -41,3 +41,7 @@ export interface TronCategory {
     name: string;
     description: string;
 }
+
+// Next exports app, and expects it to be hosted on domain root. But gh-pages host it at /<Repo name> path, so I've added those to all links
+// export const deploymentPrefix = "/NIT"
+export const deploymentPrefix = ""

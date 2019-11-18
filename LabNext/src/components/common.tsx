@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { StoreItem, TronCategory } from "../shared/components";
+import { StoreItem, TronCategory, deploymentPrefix } from "../shared/components";
 import { useClick, useKeyDown, useMobileScroll, useWindowBounds } from "./hooks";
 import { NoSSR, VSpaced } from "./layout";
 import { Section, SectionProps } from "./section";
@@ -161,9 +161,9 @@ export const Sidebar: React.FC<SidebarProps> = props => {
     let links = props.categories.map(category =>
         <NavLink 
             key={category.id}
-            selected={props.path == `/?category=${category.id}`} 
+            selected={props.path == `${deploymentPrefix}/?category=${category.id}`} 
             label={category.name} 
-            href={`/?category=${category.id}`}
+            href={`${deploymentPrefix}/?category=${category.id}`}
             tooltip={category.description} 
         />
     )
@@ -200,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = props => {
         <header className={(props.hidden ? " hidden" : "")}>
             <img src="static/assets/SVG/white-logo.svg" className="logo" alt="Shop logo" />
             <div className="navigation">
-                <NavLink selected={props.path == "/"} label="All Items" href="/" />
+                <NavLink selected={props.path == `${deploymentPrefix}/`} label="All Items" href="/" />
                 {links}
             </div>
         </header>
@@ -334,7 +334,7 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
     let [shoppingCartItems, shoppingDispatch] = useShoppingCart()
 
     return <>
-        <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville|Lora&display=swap" rel="stylesheet" />
         <ThemeContext.Provider value={theme}>
             <StdErrContext.Provider value={errMsgDispatch}>
                 <style global jsx>{`
@@ -385,7 +385,7 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
                 </Head>
                 <ErrorMsg msg={msg} />
                 <div className="app">
-                    <Sidebar path={props.path} hidden={!sidebarShown} categories={props.categories} />
+                    <Sidebar path={deploymentPrefix + props.path} hidden={!sidebarShown} categories={props.categories} />
                     {!mobile ? <div className="spacer" /> : undefined}
                     <NoSSR>
                         <div className="content">
