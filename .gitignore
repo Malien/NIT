@@ -7,3 +7,5 @@ node_modules
 next-env.d.ts
 
 LabNext/out
+.env
+*.db

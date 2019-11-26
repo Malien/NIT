@@ -42,6 +42,15 @@ export interface TronCategory {
     description: string;
 }
 
+export interface User {
+    id: number;
+    username: string;
+    hash: string;
+    admin: boolean;
+    tokenRevision: number;
+}
+
 // Next exports app, and expects it to be hosted on domain root. But gh-pages host it at /<Repo name> path, so I've added those to all links
 // export const deploymentPrefix = "/NIT"
-export const deploymentPrefix = ""
+// require("dotenv").config()
+export const deploymentPrefix = process.env.NEXT_STATIC_PRODUCTION_PREFIX || ""
