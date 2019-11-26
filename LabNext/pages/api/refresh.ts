@@ -15,6 +15,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                 let user = await getUser({ id: payload.id })
                 if (user) {
                     res.setHeader("Set-Cookie", `rtkn=${createRefreshToken(user)}; HttpOnly`)
+                    res.statusCode = 200
                     res.end(JSON.stringify({
                         accessToken: createAccessToken(user)
                     }))

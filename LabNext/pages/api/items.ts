@@ -16,6 +16,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         let category: number | undefined = Number.parseInt(categoryStr)
         if (isNaN(id)) id = undefined;
         if (isNaN(category)) category = undefined;
+        res.statusCode = 200
         res.end(JSON.stringify(await getItems({ id, category })))
     } catch (error) {
         if (error.code === "SQLITE_ERROR") error = "Internal Database error"

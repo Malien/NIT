@@ -51,7 +51,7 @@ export async function withAuth(req: IncomingMessage): Promise<TokenInfo> {
     }
 }
 
-export async function authorize(username: string, password: string) {
+export async function authorize(username: string, password: string): Promise<string> {
     let res = await fetch("/api/auth", {
         method: "POST",
         credentials: "same-origin",

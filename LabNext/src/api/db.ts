@@ -1,5 +1,5 @@
 import sqlite from "sqlite3";
-import { StoreItem, User } from "../shared/components";
+import { StoreItem, User, Category } from "../shared/components";
 import qs from "qs";
 import { AssertionError } from "assert";
 import { generate } from "password-hash";
@@ -28,7 +28,7 @@ itemsDB.serialize(() => {
         "ID INTEGER PRIMARY KEY AUTOINCREMENT," + 
         "USERNAME TEXT UNIQUE NOT NULL," + 
         "HASH TEXT NOT NULL," +
-        "ADMIN INT DEFAULT 0" +
+        "ADMIN INT DEFAULT 0," +
         "TOKEN_REVISION INT DEFAULT 0" +
         ");",
     (err) => { if (err) console.error(err) })
@@ -39,7 +39,12 @@ itemsDB.serialize(() => {
                 "INSERT INTO USERS (USERNAME, HASH, ADMIN) VALUES ('admin', ?, 1);", 
                 generate("admin", {algorithm: "sha256"}), 
                 (err) => {if (err) console.error(err) })
-    })
+    }).run("CREATE TABLE IF NOT EXISTS CATEGORIES (" +
+        "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "NAME TEXT NOT NULL," +
+        "DESCRIPTION TEXT" + 
+        ");",
+    (err) => { if (err) console.error(err) })
 })
 
 interface ItemDBRequest {
@@ -131,4 +136,43 @@ export async function invalidateTokens(req: UserDBRequest): Promise<User | null>
             else resolve(user)
         })
     })
+}
+
+export function getCategories(id: number): Promise<Category>
+export function getCategories(): Promise<Category[]>
+export function getCategories(id?: number): Promise<Category | Category[]>
+export function getCategories(id?: number): Promise<Category | Category[]> {
+    return new Promise((resolve, reject) => {
+        if (typeof id !== "undefined") {
+            itemsDB.get("SELECT * FROM CATEGORIES WHERE ID=(?)", id, (err, row) => {
+                if (err) reject(err)
+                else {
+                    try {
+                        resolve(toCategory(row))
+                    } catch (e) {
+                        reject(e)
+                    }
+                }
+            })
+        } else {
+            itemsDB.all("SELECT * FROM CATEGORIES", (err, rows) => {
+                if (err) reject(err)
+                else {
+                    try {
+                        resolve(rows.map(toCategory))
+                    } catch (e) {
+                        reject(e)
+                    }
+                }
+            })
+        }
+    })
+}
+
+export function toCategory(row: any): Category {
+    return {
+        id: row.ID,
+        name: row.NAME,
+        description: row.DESCRIPTION || undefined
+    }
 }
