@@ -1,14 +1,8 @@
 import { sign, verify as _verify, VerifyOptions } from "jsonwebtoken";
-import { User } from "../../src/shared/components";
-import { IncomingMessage, OutgoingMessage, ServerResponse } from "http";
+import { User, deploymentPrefix, TokenInfo } from "../../src/shared/components";
+import { IncomingMessage } from "http";
 import { getUser } from "./db";
-
-export interface TokenInfo {
-    id: number;
-    username: string;
-    tokenRevision: number;
-    admin?: boolean;
-}
+import { useState, useEffect } from "react";
 
 export function createAccessToken(user: User) {
     // if (!process.env.NEXT_SERVER_ACCESS_TOKEN) throw new Error("Cannot find secret in .env")

@@ -1,7 +1,7 @@
 import React, { Children, FunctionComponent, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { ExtendableMat } from "../util/structures"
 import { useBounds, useKeyDown, useMounted } from "./hooks"
-import { ThemeContext } from "./style"
+import { ThemeContext, LookContext } from "./style"
 
 interface ThumbListProps {
     columns: number;
@@ -271,4 +271,70 @@ interface NoSSRProps {
 export const NoSSR: React.FC<NoSSRProps> = ({children, fallback = null}) => {
     let mounted = useMounted()
     return <>{mounted ? children : fallback}</>
+}
+
+interface TabProps {
+    title: string;
+    key?: any;
+}
+export const Tab: React.FC<TabProps> = props => <>{props.children}</>
+
+interface TabsViewProps {
+    defaultTab?: number
+    children: React.ReactElement<TabProps>;
+}
+export const TabsView: React.FC<TabsViewProps> = props => {
+    let theme = useContext(ThemeContext)
+    let look = useContext(LookContext)
+    let topRef = useRef<HTMLDivElement>(null)
+    let selectorRef = useRef<HTMLDivElement>(null)
+    let [current, setCurrent] = useState(props.defaultTab || 0)
+    let views = Children.toArray(props.children) as React.ReactElement<TabProps>[]
+
+    return <>
+        <style jsx>{`
+            .container {
+                width: 100%;
+                position: relative;
+            }
+            .top {
+                height: 300px;
+                display: flex;
+                position: relative;
+            }
+            .tab-title {
+                font-family: ${look.font};
+                font-size: ${look.largeSize}px;
+                color: ${theme.textColor};
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .selector {
+                width: 100px;
+                height: 3px;
+                background-color: ${theme.alternativeColor};
+            }
+            .view {
+                width: 100%;
+                position: relative;
+            }
+        `}</style>
+        <div className="container">
+            <div className="top" ref={topRef}>
+                {views.map((node, index) => 
+                    <div 
+                        key={node.props.key || index} 
+                        className="tab-title"
+                        onClick={() => setCurrent(index)}
+                    >{node.props.title}</div>)}
+                <div className="selector" ref={selectorRef}></div>
+            </div>
+            <div className="view">
+                {views[current]}
+            </div>
+        </div>
+    </>
 }

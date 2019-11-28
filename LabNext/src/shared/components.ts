@@ -56,6 +56,13 @@ export interface Category {
     description?: string;
 }
 
+export interface TokenInfo {
+    id: number;
+    username: string;
+    tokenRevision: number;
+    admin?: boolean;
+}
+
 // Next exports app, and expects it to be hosted on domain root. But gh-pages host it at /<Repo name> path, so I've added those to all links
 // export const deploymentPrefix = "/NIT"
 // require("dotenv").config()

@@ -1,7 +1,6 @@
 import sqlite from "sqlite3";
 import { StoreItem, User, Category } from "../shared/components";
 import qs from "qs";
-import { AssertionError } from "assert";
 import { generate } from "password-hash";
 
 export const itemsDB = new sqlite.Database("fastshop.db", (err) => {
@@ -175,4 +174,30 @@ export function toCategory(row: any): Category {
         name: row.NAME,
         description: row.DESCRIPTION || undefined
     }
+}
+
+export async function register(username: string, password: string): Promise<User> {
+    let user = await getUser({username})
+    if (user) throw new Error("User already exists")
+    return new Promise((resolve, reject) => {
+        itemsDB.run("INSERT INTO USERS (USERNAME, HASH) VALUES (?, ?)", 
+        username, 
+        generate(password, {algorithm: "sha256"})),
+        (err) => {
+            if (err) reject(err)
+            else resolve(getUser({username}).then(e => {
+                if (!e) throw new Error("Cannot find user")
+                else return e
+            }))
+        }
+    })
+}
+
+export function evalQuery(query: string, ...params: any[]): Promise<any> {
+    return new Promise((resolve, reject) => {
+        itemsDB.run(query, ...params, (err, data) => {
+            if (err) reject(err)
+            else resolve(data)
+        })
+    })
 }

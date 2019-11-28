@@ -9,7 +9,7 @@ import { CheckoutPane } from "./checkout"
 import { classes } from "./util"
 
 // If products change or new version is deployed, should probably change cart version to invalidate user's shopping cart
-export const SHOPPING_CART_VERSION = 1
+export const SHOPPING_CART_VERSION = process.env.NEXT_STATIC_CART_VERSION!
 
 // React context used to dispactch deep updates of cart contents inside components with state update 'n stuff
 export const ShoppingCartContext = createContext<React.Dispatch<SCAction> | null>(null)

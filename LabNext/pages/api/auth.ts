@@ -1,5 +1,5 @@
 import { NextApiResponse, NextApiRequest } from "next";
-import { generate, verify } from "password-hash";
+import { verify } from "password-hash";
 import { getUser } from "../../src/api/db";
 import { createRefreshToken, createAccessToken } from "../../src/api/authUtils";
 
