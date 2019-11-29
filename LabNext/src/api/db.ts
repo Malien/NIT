@@ -1,11 +1,11 @@
 import sqlite, { Database } from "sqlite";
 import { StoreItem, User, Tag, Order } from "../shared/components";
-import qs from "qs";
 import { generate } from "password-hash";
 import { readFile } from "fs";
 import SQL, { SQLStatement } from "sql-template-strings";
 
 export const dbPromise = initDB({
+    dbLocation: "fastshop.db",
     from: "./src/api/configuration.sql",
     withAdmin: {
         username: process.env.NEXT_SERVER_ADMIN_USERNAME || "admin",
@@ -14,11 +14,14 @@ export const dbPromise = initDB({
 })
 
 /**
+ * Initialize database with configs to a file
+ * @param param.dbLocation path to a db file. Defaults to `:memory:` (in-memory database)
  * @param param.from path to a file with sql statements to be executed in concurently
  *             seperated by semicolons. Optional
  * @param param.withAdmin if provided initial admin user is created on start
  */
-async function initDB({ from, withAdmin }: {
+async function initDB({ dbLocation = ":memory:", from, withAdmin }: {
+    dbLocation?: string
     from?: string;
     withAdmin?: {
         username: string;
@@ -34,7 +37,7 @@ async function initDB({ from, withAdmin }: {
             })
         })
         let confstr: string
-        [db, confstr] = await Promise.all([sqlite.open("fastshop.db"), strPromise])
+        [db, confstr] = await Promise.all([sqlite.open(dbLocation), strPromise])
         try {
             await Promise.all(
                 confstr.split(";")
@@ -45,7 +48,7 @@ async function initDB({ from, withAdmin }: {
             console.error(e)
         }
     } else {
-        db = await sqlite.open("fastshop.db")
+        db = await sqlite.open(dbLocation)
     }
     if (withAdmin) {
         let { "count(*)": count } = await db.get("SELECT count(*) FROM Users WHERE admin=1")
@@ -56,65 +59,6 @@ async function initDB({ from, withAdmin }: {
     }
     return db
 }
-
-// export const itemsDB = new sqlite.Database("fastshop.db", (err) => {
-//     if (err) {
-//         console.error(err)
-//     }
-// })
-// itemsDB.serialize(() => {
-//     itemsDB.run("CREATE TABLE IF NOT EXISTS ITEMS (" +
-//         "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//         "NAME TEXT NOT NULL," +
-//         "PREVIEWS TEXT NOT NULL," +
-//         "TAGS TEXT NOT NULL," +
-//         "PRICE REAL NOT NULL," +
-//         "CATEGORY INTEGER NOT NULL," +
-//         "RATING REAL NOT NULL," +
-//         "STOCK INTEGER NOT NULL," +
-//         "DESCRIPTION TEXT," +
-//         "PREVPRICE REAL," +
-//         "BIAS REAL" +
-//         ");",
-//         (err) => { if (err) console.error(err) })
-//     .run("CREATE TABLE IF NOT EXISTS USERS (" +
-//         "ID INTEGER PRIMARY KEY AUTOINCREMENT," + 
-//         "USERNAME TEXT UNIQUE NOT NULL," + 
-//         "HASH TEXT NOT NULL," +
-//         "ADMIN INTEGER DEFAULT 0," +
-//         "TOKEN_REVISION INTEGER DEFAULT 0" +
-//         ");",
-//         (err) => { if (err) console.error(err) })
-//     .get("SELECT count(*) FROM USERS;", (err, row) => {
-//         if (err) console.error(err)
-//         if (row["count(*)"] == 0) 
-//             itemsDB.run(
-//                 "INSERT INTO USERS (USERNAME, HASH, ADMIN) VALUES ('admin', ?, 1);", 
-//                 generate("admin", {algorithm: "sha256"}), 
-//                 (err) => {if (err) console.error(err) })
-//     }).run("CREATE TABLE IF NOT EXISTS CATEGORIES (" +
-//         "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-//         "NAME TEXT NOT NULL," +
-//         "DESCRIPTION TEXT" + 
-//         ");",
-//         (err) => { if (err) console.error(err) })
-//     .run(
-//         "CREATE TABLE IF NOT EXISTS ORDERS(" +
-//         "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-//         "ITEMID INTEGER NOT NULL," +
-//         "DISTID INTEGER NOT NULL," +
-//         "COUNT INTEGER NOT NULL" +
-//         ");",
-//         (err) => { if (err) console.error(err) })
-//     .run(
-//         "CREATE TABLE IF NOT EXISTS DESTINATIONS(" +
-//         "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-//         "ADDRESS TEXT NOT NULL," +
-//         "EMAIL TEXT," +
-//         "PHONE CHARACTER(20)" +
-//         ");",
-//         (err) => { if (err) console.error(err) })
-// })
 
 interface ItemDBRequest {
     tag?: number;
