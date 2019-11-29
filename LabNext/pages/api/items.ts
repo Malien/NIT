@@ -8,16 +8,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         return
     }
     try {
-        let { id: idStr, category: categoryStr } = req.query
+        let { id: idStr, tag: tagStr } = req.query
         if (idStr instanceof Array) idStr = idStr[0];
-        if (categoryStr instanceof Array) categoryStr = categoryStr[0];
+        if (tagStr instanceof Array) tagStr = tagStr[0];
         res.setHeader("Content-Type", "application/json")
         let id: number | undefined = Number.parseInt(idStr)
-        let category: number | undefined = Number.parseInt(categoryStr)
+        let tag: number | undefined = Number.parseInt(tagStr)
         if (isNaN(id)) id = undefined;
-        if (isNaN(category)) category = undefined;
+        if (isNaN(tag)) tag = undefined;
         res.statusCode = 200
-        res.end(JSON.stringify(await getItems({ id, category })))
+        res.end(JSON.stringify(await getItems({ id, tag })))
     } catch (error) {
         if (error.code === "SQLITE_ERROR") error = "Internal Database error"
         res.statusCode = 500
