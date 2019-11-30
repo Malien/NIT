@@ -1,6 +1,10 @@
 import { NextPage } from "next";
+import dynamic from "next/dynamic";
 import { AuthPane, useAuth, Authed, AuthContext } from "../src/components/auth";
 
+const AdminPanel = dynamic(() => import("../src/components/adminPanel"), {loading: () => <>Loading...</>})
+
+//TODO: Server-side render admin panel (auth user with refresh token if provided upon request)
 const AdminPagePage: NextPage = () => {
     let auth = useAuth()
 
@@ -17,8 +21,8 @@ const AdminPagePage: NextPage = () => {
                     <button onClick={auth.logout}>logout</button>
                 </>}
             >
-                Congrats
                 <button onClick={auth.logout}>logout</button>
+                <AdminPanel />
             </Authed>
         </AuthContext.Provider>
     </>

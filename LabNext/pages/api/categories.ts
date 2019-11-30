@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getCategories } from "../../src/api/db";
+import { getTags } from "../../src/api/db";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.setHeader("Content-Type", "application/json")
@@ -13,7 +13,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
     try {
-        let category = await getCategories(id)
+        let category = await getTags(id)
         res.statusCode = 200
         res.end(JSON.stringify(category))
     } catch (error) {

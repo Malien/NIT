@@ -1,20 +1,22 @@
-/**
- * Item that supposed to be used in the store
- */ 
-export interface StoreItem {
+export interface StrippedItem {
+    id: number;
     name: string;
-    id: string;
-    previews: string[];
-    tags: Tag[];
     price: number;
     rating: number;
     description: string | null;
     prevPrice: number | null;
+    bias: number | null // Possible user-tracked bias to a product to promote it to the top
+    outOfStock?: boolean
+}
+/**
+ * Item that supposed to be used in the store
+ */ 
+export interface StoreItem extends StrippedItem {
+    previews: string[];
+    tags: Tag[];
     size?: string;
     criteriaTable?: {[key: string]: any};
     variants?: string[]
-    bias: number | null // Possible user-tracked bias to a product to promote it to the top
-    outOfStock?: boolean
 }
 
 /**
@@ -59,12 +61,21 @@ export interface TokenInfo {
     admin?: boolean;
 }
 
-export interface CountedStoreItem extends StoreItem {
+export interface CountedStoreItem extends StrippedItem {
     count: number;
 }
 
 export interface Order {
+    products: {[key: number]: number};
+    name: string;
+    address: string;
+    email: string | null;
+    phone: string | null;
+}
+
+export interface PlacedOrder {
     products: CountedStoreItem[];
+    id: number;
     name: string;
     address: string;
     email: string | null;

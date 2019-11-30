@@ -1,17 +1,21 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { Order } from "../../src/shared/components"
+import { putOrder } from "../../src/api/db"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+    res.setHeader("Content-Type", "application/json")
     try {
-        let {products, phone, name, address, email} = JSON.parse(req.body) as Order
-        if (!name) throw new Error("Name is required")
-        if (!phone && !email) throw new Error("Either phone number nor email is provided")
-        if (!address) throw new Error("Address is not provided")
-        if (!products) throw new Error("No products provided")
-        if (products.length == 0) throw new Error("Empty products list")
+        let order = JSON.parse(req.body) as Order
+        if (!order.name) throw new Error("Name is required")
+        if (!order.phone && !order.email) throw new Error("Either phone number nor email is provided")
+        if (!order.address) throw new Error("Address is not provided")
+        if (!order.products) throw new Error("No products provided")
+        if (Object.keys(order.products).length == 0) throw new Error("Empty products list")
 
-        
-    } catch (e) {
-
+        let id = await putOrder(order)
+        res.end(id)
+    } catch (error) {
+        res.statusCode = 500
+        res.end(JSON.stringify(error))
     }
 }
