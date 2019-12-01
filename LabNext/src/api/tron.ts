@@ -13,7 +13,7 @@ export function toStoreItem(from: TronItem | TronItem[]): StoreItem | StoreItem[
         return from.map(val => toStoreItem(val));
     }
 
-    let prevPrice: number | undefined
+    let prevPrice: number | null = null
     let price: number
     if (from.special_price) {
         prevPrice = Number.parseFloat(from.price)

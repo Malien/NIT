@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useLayoutEffect, useState } from "react"
 import ResizeObserver from "resize-observer-polyfill"
+import { AuthContext } from "./auth"
+import { Dark, Light } from "./style"
 
 export interface Bounds {
     width: number;
@@ -148,11 +150,11 @@ export function useHover<T extends HTMLElement>(ref: React.RefObject<T> | T | un
     useEffect(() => {
         if (ref) {
             let el = (ref instanceof HTMLElement) ? ref : ref.current
-            let enter = onEnter 
+            let enter = onEnter
                 ? () => {
                     onEnter()
                     setHovered(true)
-                } 
+                }
                 : () => setHovered(true)
             let leave = () => setHovered(false)
             if (el) {
@@ -248,7 +250,7 @@ export function useMounted() {
 interface PartialInputState {
     value: string;
 }
-interface ValidatedInputState extends PartialInputState{
+interface ValidatedInputState extends PartialInputState {
     valid: boolean;
 }
 type InputState = PartialInputState | ValidatedInputState
@@ -257,22 +259,71 @@ type InputState = PartialInputState | ValidatedInputState
  * @param params value: initial value of a field, pattern: pattern to validate the input
  * @returns object with current value, and field validity
  */
-export function useInputState(params: {value?: string, pattern: RegExp | string}) : [ValidatedInputState, (value: string) => void]
+export function useInputState(params: { value?: string, pattern: RegExp | string }): [ValidatedInputState, (value: string) => void]
 /**
  * Setups state for an input field. Without validation
  * @param params value: initial value of a field
  * @returns object with current value
  */
-export function useInputState(params: {value?: string}) : [PartialInputState, (value: string) => void]
+export function useInputState(params: { value?: string }): [PartialInputState, (value: string) => void]
 
-export function useInputState({value, pattern}: {value?: string, pattern?: RegExp | string}) : [InputState, (value: string) => void] {
-    let defaultState = (pattern) ? {value: value || "", valid: true} : {value: value || ""} 
+export function useInputState({ value, pattern }: { value?: string, pattern?: RegExp | string }): [InputState, (value: string) => void] {
+    let defaultState = (pattern) ? { value: value || "", valid: true } : { value: value || "" }
     let [state, setState] = useState<InputState>(defaultState)
     if (pattern) {
         let p = (typeof pattern == "string") ? new RegExp(pattern) : pattern
         return [state, (value: string) => {
-            setState({value, valid: p.test(value)})
+            setState({ value, valid: p.test(value) })
         }]
-    } 
-    return [state, (value: string) => {setState({value})}]
+    }
+    return [state, (value: string) => { setState({ value }) }]
+}
+
+export function useTheme() {
+    let [theme, setTheme] = useState(Light)
+    useLayoutEffect(() => {
+        let match = window.matchMedia("(prefers-color-scheme: dark)").matches
+        setTheme(match ? Dark : Light)
+
+        function match_func({ matches }: MediaQueryListEvent) {
+            if (matches) setTheme(Dark)
+            else setTheme(Light)
+        }
+        window.matchMedia("(prefers-color-scheme: dark)").addListener(match_func)
+        return () => window.matchMedia("(prefers-color-scheme: dark)").removeListener(match_func)
+    }, [])
+    return theme
+}
+
+export interface ReturnedDataWrapper<T> {
+    data?: T;
+    err?: any;
+    loading: boolean;
+}
+export function useData<T = any>(url, { body, method }: { body?: BodyInit | null; method?: string; } = {}, deps?: any[]): ReturnedDataWrapper<T> {
+    let [data, setData] = useState<T | undefined>()
+    let [err, setErr] = useState<any | undefined>()
+    let [loading, setLoading] = useState(true)
+    let auth = useContext(AuthContext)
+    useEffect(() => {
+        if (auth && auth.token.accessToken) {
+            fetch(url, {
+                method,
+                body,
+                headers: {
+                    "Authorization": `Bearer ${auth.token.accessToken}`
+                }
+            })
+            .then(v => v.json())
+            .then(setData)
+            .catch(err => {
+                console.error(err)
+                setErr(err)
+            })
+            .then(() => setLoading(false))
+        } else {
+            fetch(url, { body, method }).then(v => v.json()).then(setData).catch(setErr).then(() => setLoading(false))
+        }
+    }, deps)
+    return { data, err, loading }
 }

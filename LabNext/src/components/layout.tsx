@@ -1,7 +1,8 @@
-import React, { Children, FunctionComponent, useContext, useEffect, useMemo, useRef, useState } from "react"
+import React, { Children, FunctionComponent, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { ExtendableMat } from "../util/structures"
-import { useBounds, useKeyDown, useMounted } from "./hooks"
-import { ThemeContext, LookContext } from "./style"
+import { useBounds, useKeyDown, useMounted, useWindowBounds } from "./hooks"
+import { LookContext, ThemeContext } from "./style"
+import { classes } from "./util"
 
 interface ThumbListProps {
     columns: number;
@@ -184,7 +185,7 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = props => {
         if (!mounted) {
             if (props.placeholder) {
                 let items: JSX.Element[] = []
-                for (let i=0; i<Children.count(props.children); ++i) {
+                for (let i = 0; i < Children.count(props.children); ++i) {
                     items.push(<div key={i} style={
                         {
                             gridRow: `span 1`,
@@ -268,7 +269,7 @@ interface NoSSRProps {
  * Disables server-side rendering for components inside. Can render optional fallback
  * @param param0 fallback to be rendered
  */
-export const NoSSR: React.FC<NoSSRProps> = ({children, fallback = null}) => {
+export const NoSSR: React.FC<NoSSRProps> = ({ children, fallback = null }) => {
     let mounted = useMounted()
     return <>{mounted ? children : fallback}</>
 }
@@ -281,7 +282,7 @@ export const Tab: React.FC<TabProps> = props => <>{props.children}</>
 
 interface TabsViewProps {
     defaultTab?: number
-    children: React.ReactElement<TabProps>;
+    children: React.ReactElement<TabProps>[];
 }
 export const TabsView: React.FC<TabsViewProps> = props => {
     let theme = useContext(ThemeContext)
@@ -289,6 +290,20 @@ export const TabsView: React.FC<TabsViewProps> = props => {
     let topRef = useRef<HTMLDivElement>(null)
     let selectorRef = useRef<HTMLDivElement>(null)
     let [current, setCurrent] = useState(props.defaultTab || 0)
+    let [selectorPosition, setSelectorPosition] = useState({ length: 400, x: 0 })
+    let scale = selectorPosition.length
+    let {width: windowWidth} = useWindowBounds([])
+    useLayoutEffect(() => {
+        let top = topRef.current
+        let selector = selectorRef.current
+        if (top && selector) {
+            let cur = top.children[current] as HTMLAnchorElement
+            let x = cur.offsetLeft - top.offsetLeft + cur.offsetWidth * 0.1
+            let length = cur.offsetWidth * 0.8
+            setSelectorPosition({ x, length })
+        }
+    }, [current, props.children, windowWidth])
+
     let views = Children.toArray(props.children) as React.ReactElement<TabProps>[]
 
     return <>
@@ -296,41 +311,68 @@ export const TabsView: React.FC<TabsViewProps> = props => {
             .container {
                 width: 100%;
                 position: relative;
+                border-radius: 5px;
             }
             .top {
-                height: 300px;
+                font-size: ${look.mediumSize}px;
                 display: flex;
                 position: relative;
+                background-color: ${theme.subbackgroundColor};
+                padding: 10px 0;
+                border-radius: 20px;
             }
             .tab-title {
                 font-family: ${look.font};
-                font-size: ${look.largeSize}px;
                 color: ${theme.textColor};
                 width: 100%;
                 height: 100%;
+                height: 1.5em;
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                user-select: none;
+                cursor: pointer;
+                transition: background 0.2s 0s ease-in;
+                padding-bottom: 16px;
+                margin: 0 10px;
+                border-radius: 15px;
             }
             .selector {
-                width: 100px;
-                height: 3px;
-                background-color: ${theme.alternativeColor};
+                width: 1px;
+                height: 6px;
+                background-color: ${theme.alternateTextColor};
+                position: absolute;
+                bottom: 20px;
+                left: 0;
+                border-radius: 3px;
+                transition: all 0.2s 0s ease-in;
             }
             .view {
+                margin-top: 20px;
+                border-radius: 20px;
+                background-color: ${theme.subbackgroundColor};
                 width: 100%;
                 position: relative;
+            }
+            .tab-title.selected {
+                color: ${theme.alternateTextColor};
+                background-color: ${theme.headerSubcolor};
             }
         `}</style>
         <div className="container">
             <div className="top" ref={topRef}>
-                {views.map((node, index) => 
-                    <div 
-                        key={node.props.key || index} 
-                        className="tab-title"
+                {views.map((node, index) =>
+                    <a
+                        key={node.props.key || index}
+                        className={classes({"tab-title": true, "first": index == 0, "selected": index == current})}
                         onClick={() => setCurrent(index)}
-                    >{node.props.title}</div>)}
-                <div className="selector" ref={selectorRef}></div>
+                    >{node.props.title}</a>)}
+                <div
+                    className="selector"
+                    ref={selectorRef}
+                    // style={{transform: `translateX(${translation}px) scaleX(${scale})`}}
+                    style={{ width: scale, left: selectorPosition.x }}
+                />
             </div>
             <div className="view">
                 {views[current]}

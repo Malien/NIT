@@ -249,3 +249,7 @@ export async function getOrders({id, limit, offset}: OrderDBRequest): Promise<Pl
         products: itemOrders[index]
     }))
 }
+
+export async function query(querry: SQLStatement) {
+    return (await dbPromise).all(querry)
+}

@@ -6,12 +6,22 @@ export interface StrippedItem {
     description: string | null;
     prevPrice: number | null;
     bias: number | null // Possible user-tracked bias to a product to promote it to the top
-    outOfStock?: boolean
+}
+
+export interface DBItem extends StrippedItem {
+    stock: number
+}
+
+export interface Preview {
+    id: number;
+    path: string;
+    alt: string | null;
 }
 /**
  * Item that supposed to be used in the store
  */ 
 export interface StoreItem extends StrippedItem {
+    outOfStock?: boolean
     previews: string[];
     tags: Tag[];
     size?: string;
@@ -24,7 +34,7 @@ export interface StoreItem extends StrippedItem {
  */ 
 export interface TronItem {
     name: string;
-    id: string;
+    id: number;
     description: string;
     image_url: string;
     price: string;

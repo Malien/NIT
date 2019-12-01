@@ -1,13 +1,13 @@
 import Head from "next/head";
 import Link from "next/link";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { StoreItem, TronCategory, deploymentPrefix } from "../shared/components";
-import { useClick, useKeyDown, useMobileScroll, useWindowBounds } from "./hooks";
+import { deploymentPrefix, StoreItem, TronCategory } from "../shared/components";
+import { ErrorMsg, StdErrContext, useMessageDispatch } from "./errors";
+import { useClick, useKeyDown, useMobileScroll, useTheme, useWindowBounds } from "./hooks";
 import { NoSSR, VSpaced } from "./layout";
 import { Section, SectionProps } from "./section";
 import { SCActionType, ShoppingCart, ShoppingCartContext, useShoppingCart } from "./shopping";
-import { Dark, Light, LookContext, ThemeContext } from "./style";
-import { useMessageDispatch, StdErrContext, ErrorMsg } from "./errors";
+import { LookContext, ThemeContext } from "./style";
 
 //TODO: provide default image for product
 export const defaultImage = "";
@@ -302,7 +302,7 @@ interface AppFrameProps {
  * @param categories that are probably fetched from the server, used to display them in the sidebar
  */
 export const AppFrame: React.FC<AppFrameProps> = props => {
-    let [theme, setTheme] = useState(Light)
+    let theme = useTheme()
     let { width } = useWindowBounds()
     let [mobile, setMobile] = useState((width) ? width < 800 : true);
     let [sidebarShown, setSidebarShown] = useState(!mobile)
@@ -317,17 +317,6 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
     useEffect(() => {
         setMobile((width) ? width < 800 : true)
     }, [width])
-    useEffect(() => {
-        let match = window.matchMedia("(prefers-color-scheme: dark)").matches
-        setTheme(match ? Dark : Light)
-
-        function match_func({ matches }: MediaQueryListEvent) {
-            if (matches) setTheme(Dark)
-            else setTheme(Light)
-        }
-        window.matchMedia("(prefers-color-scheme: dark)").addListener(match_func)
-        return () => window.matchMedia("(prefers-color-scheme: dark)").removeListener(match_func)
-    }, [])
 
     let [msg, errMsgDispatch] = useMessageDispatch()
 
