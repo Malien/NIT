@@ -212,10 +212,10 @@ export async function putOrder(order: Order): Promise<number> {
     await db.run(
         SQL`UPDATE Items 
         SET stock = stock - (
-            SELECT count FROM Orders WHERE itemID = Items.id AND orderID = ${orderID}
+            SELECT count FROM ItemOrders WHERE itemID = Items.id AND orderID = ${orderID}
         ) 
         WHERE id IN (
-            SELECT itemID FROM Orders WHERE orderID = ${orderID}
+            SELECT itemID FROM ItemOrders WHERE orderID = ${orderID}
         )`)
     return orderID
 }

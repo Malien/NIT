@@ -300,7 +300,11 @@ export interface ReturnedDataWrapper<T> {
     err?: any;
     loading: boolean;
 }
-export function useData<T = any>(url, { body, method }: { body?: BodyInit | null; method?: string; } = {}, deps?: any[]): ReturnedDataWrapper<T> {
+interface DataRequestOptions {
+    body?: BodyInit | null;
+    method?: string;
+}
+export function useData<T = any>(url, { body, method }: DataRequestOptions = {}, deps?: any[]): ReturnedDataWrapper<T> {
     let [data, setData] = useState<T | undefined>()
     let [err, setErr] = useState<any | undefined>()
     let [loading, setLoading] = useState(true)
@@ -326,4 +330,12 @@ export function useData<T = any>(url, { body, method }: { body?: BodyInit | null
         }
     }, deps)
     return { data, err, loading }
+}
+
+export function useErrData<T = any>(url, options: DataRequestOptions = {}, deps?: any[]): ReturnedDataWrapper<T> {
+    let {data, err, loading} = useData(url, options, deps)
+    if (data && typeof data.error !== "undefined") {
+        return {data: undefined, err: data.error, loading}
+    }
+    return {data, err, loading}
 }
