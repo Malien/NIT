@@ -21,7 +21,8 @@ export const ShoppingCartContext = createContext<React.Dispatch<SCAction> | null
  */
 export const SCReducer: Reducer<SCProps, SCAction> = (state, action) => {
     const getIndex = () => {
-        let index = (typeof action.id == "number") ? action.id : state.items.findIndex(item => item.id === action.id)
+        if (typeof action.idx !== "undefined") return action.idx
+        let index = state.items.findIndex(item => item.id === action.id)
         if (index == -1) {
             if (action.fallbackItem) {
                 index = state.items.length
@@ -62,6 +63,7 @@ export enum SCActionType {
 export interface SCAction {
     type: SCActionType;
     id?: number | string;
+    idx?: number;
     count?: number;
     fallbackItem?: StoreItem;
     resetState?: SCItem[];
@@ -423,10 +425,10 @@ export const SCItemList: React.FC<SCItemListProps> = props => {
             key={item.id}
             count={item.count}
             onChange={count => {
-                if (dispatch) dispatch({ id: index, count, type: SCActionType.set })
+                if (dispatch) dispatch({ idx: index, count, type: SCActionType.set })
             }}
             onSubmit={count => {
-                if (dispatch) dispatch({ id: index, count, type: SCActionType.submit })
+                if (dispatch) dispatch({ idx: index, count, type: SCActionType.submit })
             }}
             {...item}
         />

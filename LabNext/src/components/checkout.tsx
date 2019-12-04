@@ -3,9 +3,10 @@ import { ThemeContext, LookContext } from "./style";
 import { SCItem, SCItemList, ShoppingCartContext, SCActionType } from "./shopping"; // This is probably circular depencancy
 import { classes } from "./util";
 import { useMounted, useCancel, useInputState } from "./hooks";
-import { submitPurchase } from "../api/tron";
 import { fromEntries } from "../util/pollyfilling";
 import { StdErrContext } from "./errors";
+import { Order } from "../shared/components";
+import { placeOrder } from "../api/new";
 
 interface CheckoutPaneProps {
     cart: SCItem[];
@@ -13,6 +14,7 @@ interface CheckoutPaneProps {
     email?: string;
     name?: string;
     phone?: string;
+    address?: string;
 }
 /**
  * Pop over pane that is used to confirm users purchase
@@ -31,7 +33,9 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
     let [dismissed, setDismissed] = useState(false)
     let [email, setEmail] = useInputState({value: props.email, pattern: ".+@\\w+\\.\\w+"})
     let [name, setName] = useInputState({value: props.name})
+    let [address, setAddress] = useInputState({value: props.address})
     let [phone, setPhone] = useInputState({value: props.phone, pattern: "\\+380\\d{9}"})
+    let [isPhone, setIsPhone] = useState(true)
     let formRef = useRef<HTMLFormElement>(null)
     let dimmerRef = useRef<HTMLDivElement>(null)
     useCancel(dimmerRef, () => {
@@ -88,7 +92,7 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                 transform: translateY(0);
                 transition: transform 0.2s ease-in;
                 display: grid;
-                grid-template-columns: auto auto 200px;
+                grid-template-columns: auto auto 300px;
                 border-radius: 20px;
                 box-shadow: ${theme.shadowColor} 2px 2px 10px 3px;
             }
@@ -101,7 +105,7 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
             .actions {
                 position: relative;
             }
-            input {
+            .text-field {
                 grid-column: 3;
                 appearance: none;
                 background-color: ${theme.subbackgroundColor};
@@ -118,10 +122,10 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                 border: solid 2px #ff000000;
                 transition: border 0.2s ease-in;
             }
-            input.invalid {
+            .text-field.invalid {
                 border: solid 2px red;
             }
-            input::after {
+            .text-field::after {
                 content: "";
                 display: block;
                 width: 100%;
@@ -133,8 +137,11 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                 border: solid 2px red;
                 transition: border 0.2s ease-in;
             }
-            input.invalid::after {
+            .text-field.invalid::after {
                 opacity: 1;
+            }
+            .text-field:disabled {
+                filter: saturate(60%) brightness(80%);
             }
             button {
                 outline: 0;
@@ -208,6 +215,42 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                 align-items: center;
                 flex-direction: column;
             }
+            .choice-box {
+                color: ${theme.textColor};
+                font-family: ${look.font};
+                font-size: ${look.smallSize}px;
+                justify-self: flex-start;
+                padding: 0 20px;
+            }
+            .additional-info {
+                color: ${theme.textColor};
+                font-family: ${look.font};
+                font-size: ${look.mediumSize}px;
+                padding: 10px;
+            }
+            .hdivider {
+                width: 90%;
+                margin: 10px 5%;
+                height: 1px;
+                background-color: ${theme.subbackgroundColor}
+            }
+            .center-box {
+                display: flex;
+                align-items: center;
+            }
+            .radio {
+                margin-right: 20px;
+            }
+            @media (max-width: 700px) {
+                .container {
+                    grid-template-columns: auto;
+                }
+                .divider {
+                    width: 90%;
+                    margin: 10px 5%;
+                    height: 1px;
+                }
+            }
         `}</style>
         <div className={classes({dimmer: true, hidden: !mounted || dismissed})} ref={dimmerRef} />
         <div className={classes({padded: true, hidden: !mounted || dismissed})} >
@@ -226,51 +269,108 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                             name="name" 
                             value={name.value} 
                             placeholder="Full name"
+                            className="text-field"
                             onChange={(event) => {
                                 setName(event.target.value)
                             }}
                         />
                         <input 
-                            type="email" 
-                            name="email" 
-                            value={email.value} 
-                            placeholder="E-mail" 
-                            pattern=".+@\w+\.\w+" 
-                            className={classes({invalid: !email.valid})}
+                            type="text" 
+                            name="address" 
+                            value={address.value} 
+                            placeholder="Delivery address"
+                            className="text-field"
                             onChange={(event) => {
-                                setEmail(event.target.value)
+                                setAddress(event.target.value)
                             }}
                         />
-                        <input 
-                            type="text"
-                            name="phone" 
-                            value={phone.value}
-                            placeholder="Phone number"
-                            pattern="\+380\d{9}" 
-                            autoComplete="tel" 
-                            className={classes({invalid: !phone.valid})}
-                            onChange={(event) => {
-                                setPhone(event.target.value)
-                            }}
-                        />
+                        <div className="hdivider"/>
+                        <div className="additional-info">Confirm order using </div>
+                        <div className="choice-box">
+                            <div className="center-box">
+                                <input 
+                                    type="radio"
+                                    name="isPhone"
+                                    checked={isPhone}
+                                    onChange={() => setIsPhone(true)}
+                                    className="radio"
+                                    id="checkout-is-phone"
+                                />
+                                <label htmlFor="checkout-is-phone">Phone number: </label>
+                            </div>
+                            <input 
+                                type="text"
+                                name="phone" 
+                                value={phone.value}
+                                disabled={!isPhone}
+                                placeholder="Phone number"
+                                pattern="\+380\d{9}" 
+                                autoComplete="tel" 
+                                className={classes({"text-field": true, invalid: !phone.valid})}
+                                onChange={(event) => {
+                                    setPhone(event.target.value)
+                                }}
+                            />
+                        </div>
+                        <div className="choice-box">
+                            <div className="center-box">
+                                <input 
+                                    type="radio"
+                                    name="isEmail"
+                                    checked={!isPhone}
+                                    onChange={() => setIsPhone(false)}
+                                    className="radio"
+                                    id="checkout-is-radio"
+                                />
+                                <label htmlFor="checkout-is-radio">Email address: </label>
+                            </div>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                value={email.value} 
+                                disabled={isPhone}
+                                placeholder="E-mail" 
+                                pattern=".+@\w+\.\w+" 
+                                className={classes({"text-field": true, invalid: !email.valid})}
+                                onChange={(event) => {
+                                    setEmail(event.target.value)
+                                }}
+                            />
+                        </div>
                         <button disabled={!buyable} onClick={(e) => {
                             e.preventDefault()
                             let form = formRef.current
                             if (form) {
                                 let valid = form.checkValidity()
-                                if (valid) {
-                                    let products = fromEntries(props.cart.map(item => ([item.id, item.count])))
-                                    submitPurchase({name: name.value, email: email.value, phone: phone.value, products})
+                                if (valid && ((isPhone && phone.valid) || email.valid)) {
+                                    let order: Order = {
+                                        address: address.value,
+                                        name: name.value,
+                                        email: (isPhone) ? null : email.value,
+                                        phone: (isPhone) ? phone.value : null,
+                                        products: fromEntries(props.cart.map(item => ([item.id, item.count])))
+                                    }
+                                    // let products = fromEntries(props.cart.map(item => ([item.id, item.count])))
+                                    // submitPurchase({name: name.value, email: email.value, phone: phone.value, products})
+                                    placeOrder(order)
                                         .then(v => v.json())
                                         .then(v => {
                                             console.log(v)
                                             return v
                                         })
+                                        .catch(err => {
+                                            if (stderr) stderr("An error occured while processing your request")
+                                            console.error(err)
+                                        })
                                         .then(v => {
-                                            if (stderr) stderr(v.status === "error" 
-                                                ? "Error occured while processing your request" 
-                                                : `Succesfully purcahsed ${props.cart.reduce((acc, cur) => acc + cur.count, 0)} products`)
-                                            if (v.status !== "error" && dispatch) {
+                                            if (stderr) {
+                                                if (!v.id) {
+                                                    stderr(typeof v.error === "string" ? v.error : "Error occured while processing your request" )
+                                                } else {
+                                                    stderr(`Succesfully purcahsed ${props.cart.reduce((acc, cur) => acc + cur.count, 0)} products`)
+                                                }
+                                            }
+                                            if (v.id && dispatch) {
                                                 dispatch({type: SCActionType.reset, resetState: []})
                                                 setDismissed(true)
                                                 setTimeout(() => {

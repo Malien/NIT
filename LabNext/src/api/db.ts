@@ -143,7 +143,7 @@ export async function getUser({ username, id }: UserDBRequest): Promise<User | n
     }
 }
 
-export async function getUsers({limit, offset} : Limited): Promise<User[]> {
+export async function getUsers({ limit, offset }: Limited): Promise<User[]> {
     let db = await dbPromise
     return db.all(withLimit(SQL`SELECT * FROM Users`, limit, offset))
 }
@@ -200,24 +200,24 @@ export async function putOrder(order: Order): Promise<number> {
         .map(remains => remains >= 0)
         .reduce((acc, cur) => acc && cur)
     if (!viable) throw new Error("Not enought stock to satisfy request")
-    await db.run(
+    let { lastID } = await db.run(
         SQL`INSERT INTO Orders (name, address, email, phone) 
-        VALUES (${order.name, order.address, order.email || null, order.phone || null});`)
-    let orderID = await db.get(SQL`SELECT last_insert_rowid() FROM Orders`)
+        VALUES (${order.name}, ${order.address}, ${order.email || null}, ${order.phone || null});`)
+    // let orderID = await db.get(SQL`SELECT last_insert_rowid() FROM Orders`)
     let statement = SQL`INSERT INTO ItemOrders (itemId, orderID, count) VALUES `
     Object.entries(order.products).forEach(([id, count]) => {
-        statement.append(SQL` (${id}, ${orderID}, ${count})`)
+        statement.append(SQL` (${id}, ${lastID}, ${count})`)
     })
     await db.run(statement)
     await db.run(
         SQL`UPDATE Items 
         SET stock = stock - (
-            SELECT count FROM ItemOrders WHERE itemID = Items.id AND orderID = ${orderID}
+            SELECT count FROM ItemOrders WHERE itemID = Items.id AND orderID = ${lastID}
         ) 
         WHERE id IN (
-            SELECT itemID FROM ItemOrders WHERE orderID = ${orderID}
+            SELECT itemID FROM ItemOrders WHERE orderID = ${lastID}
         )`)
-    return orderID
+    return lastID
 }
 
 export async function confirmOrder(id: number): Promise<void> {
@@ -231,12 +231,12 @@ export async function confirmOrder(id: number): Promise<void> {
 interface OrderDBRequest extends Limited {
     id?: number;
 }
-export async function getOrders({id, limit, offset}: OrderDBRequest): Promise<PlacedOrder[]> {
+export async function getOrders({ id, limit, offset }: OrderDBRequest): Promise<PlacedOrder[]> {
     let db = await dbPromise
     let statement = SQL`SELECT * FROM Orders`
     if (has(id)) statement = statement.append(SQL` WHERE id=${id}`)
     let orders = await db.all(withLimit(statement, limit, offset))
-    let itemOrders = await Promise.all(orders.map(order => 
+    let itemOrders = await Promise.all(orders.map(order =>
         db.all(
             SQL`SELECT Items.id, name, price, rating, stock, description, prevprice, bias, count 
             FROM ItemOrders 

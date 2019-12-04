@@ -1,10 +1,10 @@
-import { useEffect, useReducer, useState } from "react"
+import { useEffect, useReducer, useState, Dispatch } from "react"
 import Select, { ValueType } from "react-select"
 import { DBItem, Tag, Preview } from "../../shared/components"
 import { createArrayLookupTable, createLookupTable } from "../../util/structures"
 import { DatabaseView, useDatabase } from "../database"
 import { TableColumn } from "../table"
-import { AddRowView, cellReducer, createRowElement, itemColumn, selectStyle } from "./common"
+import { AddRowView, cellReducer, createRowElement, itemColumn, selectStyle, CellAction } from "./common"
 import { number } from "prop-types"
 export const ItemsView: React.FC = () => {
     let {
@@ -30,7 +30,7 @@ export const ItemsView: React.FC = () => {
         err: errPreviewBinds,
         deleter: removePreviewBind,
         adder: addPreviewBind
-    } = useDatabase<{itemID: number, previewID: number}>("ItemPreviews")
+    } = useDatabase<{ itemID: number, previewID: number }>("ItemPreviews")
 
     const columnFunc = itemColumn.bind(this, updateItem) as (name: string, nullable?: boolean) => TableColumn
 
@@ -50,7 +50,7 @@ export const ItemsView: React.FC = () => {
         columnFunc("bias", true),
         {
             name: "previews", view: (item) => {
-                return <ItemPrewievSelector 
+                return <ItemPrewievSelector
                     item={item}
                     values={previewsLookup}
                     binds={previewBindsLookup}
@@ -92,9 +92,7 @@ export const ItemsView: React.FC = () => {
                     cellFunc("stock"),
                     cellFunc("description", true),
                     cellFunc("prevPrice", true),
-                    cellFunc("bias", true),
-                    <Select styles={selectStyle} />,
-                    <Select styles={selectStyle} />
+                    cellFunc("bias", true)
                 ]}
             </AddRowView>
             <DatabaseView columns={columns} data={items} err={errItems} loading={loadingItems} onDelete={id => deleteItem({ id })} />
@@ -128,6 +126,7 @@ export const ItemTagSelector: React.FC<ItemTagSelectorProps> = props => {
         if (props.item.id in props.binds) {
             setValue(props.binds[props.item.id]
                 .map(tagID => props.values[tagID])
+                .filter(val => val !== undefined)
                 .map(tag => ({ label: tag.name, value: tag.id }))
             )
         }
@@ -137,7 +136,6 @@ export const ItemTagSelector: React.FC<ItemTagSelectorProps> = props => {
         value={value}
         isLoading={props.isLoading}
         onChange={(tags, action) => {
-            console.log(tags, action)
             switch (action.action) {
                 case "clear": {
                     if (value instanceof Array) {
@@ -196,7 +194,6 @@ export const ItemPrewievSelector: React.FC<ItemPrewievSelectorProps> = props => 
         value={value}
         isLoading={props.isLoading}
         onChange={(tags, action) => {
-            console.log(tags, action)
             switch (action.action) {
                 case "clear": {
                     if (value instanceof Array) {

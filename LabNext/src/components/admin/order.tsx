@@ -7,7 +7,8 @@ import { classes } from "../util"
 import SQL from "sql-template-strings"
 
 export const OrdersView: React.FC = () => {
-    let { data, loading, err } = useErrData<PlacedOrder[]>("/api/orders")
+    let [reqCount, setReqCount] = useState(0)
+    let { data, loading, err } = useErrData<PlacedOrder[]>("/api/orders", {}, [reqCount])
     let [selected, setSelected] = useState<number | undefined>()
     let auth = useContext(AuthContext)
     let theme = useContext(ThemeContext)
@@ -74,50 +75,60 @@ export const OrdersView: React.FC = () => {
             <div className="right">
                 {typeof selected !== "undefined"
                     ? <OrderView {...data[selected]} onConfirm={() => {
-                        fetch("/api/eval", {
-                            method: "POST",
-                            body: JSON.stringify(SQL`DELETE FROM ItemOrders WHERE orderID=${data![selected!].id}`),
-                            headers: {
-                                "Authorization": `Bearer ${auth!.token.accessToken}`
-                            }
-                        }).then(console.log).catch(console.error)
-                        fetch("/api/eval", {
-                            method: "POST",
-                            body: JSON.stringify(SQL`DELETE FROM Orders WHERE id=${data![selected!].id}`),
-                            headers: {
-                                "Authorization": `Bearer ${auth!.token.accessToken}`
-                            }
-                        }).then(console.log).catch(console.error)
+                        Promise.all([
+                            fetch("/api/eval", {
+                                method: "POST",
+                                body: JSON.stringify(SQL`DELETE FROM ItemOrders WHERE orderID=${data![selected!].id}`),
+                                headers: {
+                                    "Authorization": `Bearer ${auth!.token.accessToken}`
+                                }
+                            }),
+                            fetch("/api/eval", {
+                                method: "POST",
+                                body: JSON.stringify(SQL`DELETE FROM Orders WHERE id=${data![selected!].id}`),
+                                headers: {
+                                    "Authorization": `Bearer ${auth!.token.accessToken}`
+                                }
+                            })
+                        ]).then(console.log).catch(console.error).then(() => {
+                            setReqCount(reqCount+1)
+                            setSelected(undefined)
+                        })
                     }} onReject={() => {
-                        fetch("/api/eval", {
-                            method: "POST",
-                            body: JSON.stringify(
-                                SQL`UPDATE Items 
-                                SET stock = stock + (
-                                    SELECT count FROM ItemOrders WHERE itemID = Items.id AND orderID = ${data![selected!].id}
-                                ) 
-                                WHERE id IN (
-                                    SELECT itemID FROM ItemOrders WHERE orderID = ${data![selected!].id}
-                                )`
-                            ),
-                            headers: {
-                                "Authorization": `Bearer ${auth!.token.accessToken}`
-                            }
-                        }).then(console.log).catch(console.error)
-                        fetch("/api/eval", {
-                            method: "POST",
-                            body: JSON.stringify(SQL`DELETE FROM ItemOrders WHERE orderID=${data![selected!].id}`),
-                            headers: {
-                                "Authorization": `Bearer ${auth!.token.accessToken}`
-                            }
-                        }).then(console.log).catch(console.error)
-                        fetch("/api/eval", {
-                            method: "POST",
-                            body: JSON.stringify(SQL`DELETE FROM Orders WHERE id=${data![selected!].id}`),
-                            headers: {
-                                "Authorization": `Bearer ${auth!.token.accessToken}`
-                            }
-                        }).then(console.log).catch(console.error)
+                        Promise.all([
+                            fetch("/api/eval", {
+                                method: "POST",
+                                body: JSON.stringify(
+                                    SQL`UPDATE Items 
+                                    SET stock = stock + (
+                                        SELECT count FROM ItemOrders WHERE itemID = Items.id AND orderID = ${data![selected!].id}
+                                    ) 
+                                    WHERE id IN (
+                                        SELECT itemID FROM ItemOrders WHERE orderID = ${data![selected!].id}
+                                    )`
+                                ),
+                                headers: {
+                                    "Authorization": `Bearer ${auth!.token.accessToken}`
+                                }
+                            }),
+                            fetch("/api/eval", {
+                                method: "POST",
+                                body: JSON.stringify(SQL`DELETE FROM ItemOrders WHERE orderID=${data![selected!].id}`),
+                                headers: {
+                                    "Authorization": `Bearer ${auth!.token.accessToken}`
+                                }
+                            }),
+                            fetch("/api/eval", {
+                                method: "POST",
+                                body: JSON.stringify(SQL`DELETE FROM Orders WHERE id=${data![selected!].id}`),
+                                headers: {
+                                    "Authorization": `Bearer ${auth!.token.accessToken}`
+                                }
+                            })
+                        ]).then(console.log).catch(console.error).then(() => {
+                            setReqCount(reqCount + 1)
+                            setSelected(undefined)
+                        })
                     }} />
                     : "Order is not selected"}
             </div>
@@ -132,6 +143,7 @@ export interface OrderViewProps extends PlacedOrder {
 export const OrderView: React.FC<OrderViewProps> = props => {
     let theme = useContext(ThemeContext)
     let look = useContext(LookContext)
+    let pr = props.products ? props.products : []
 
     return <>
         <style jsx>{`
@@ -167,8 +179,8 @@ export const OrderView: React.FC<OrderViewProps> = props => {
             }*/
         `}</style>
         <div className="order">
-            <button className="confirm" onClick={props.onConfirm}>Confirm</button>
-            <button className="reject" onClick={props.onReject}>Reject</button>
+            <button className="confirm" onClick={(e) => { e.preventDefault(); props.onConfirm() }}>Confirm</button>
+            <button className="reject" onClick={(e) => { e.preventDefault(); props.onReject() }}>Reject</button>
             <div className="crit name">Name: {props.name}</div>
             <div className="crit addr">Name: {props.address}</div>
             {props.email && <div className="crit contact">Email: {props.email}</div>}
@@ -182,7 +194,7 @@ export const OrderView: React.FC<OrderViewProps> = props => {
                     </tr>
                 </thead>
                 <tbody>
-                    {props.products.map(item =>
+                    {pr.map(item =>
                         <tr key={item.id} className="product">
                             <td className="product-id product-crit">{item.id}</td>
                             <td className="product-name product-crit">{item.name}</td>
@@ -191,7 +203,7 @@ export const OrderView: React.FC<OrderViewProps> = props => {
                     )}
                 </tbody>
             </table>
-            <div className="total">Total: {props.products.reduce((acc, prev) => acc + prev.count * prev.price, 0)}</div>
+            <div className="total">Total: {pr.reduce((acc, prev) => acc + prev.count * prev.price, 0)}</div>
         </div>
     </>
 }

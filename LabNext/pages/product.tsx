@@ -42,16 +42,18 @@ ProductPage.getInitialProps = async ({ req, query }) => {
         try {
             if (!id) return fetchTagsNode().then(tags => ({ tags }))
             let [item, tags] = await Promise.all([
-                fetchItemsNode({ id }).then(items => item[0]),
+                fetchItemsNode({ id }).then(items => items[0]),
                 fetchTagsNode()
             ])
             return { item, tags }
         } catch (e) {
+            console.error(e)
             try {
                 // Try to fetch only categories
                 let tags = await fetchTagsNode()
                 return { tags, err: true }
             } catch (e) {
+                console.error(e)
                 return { tags: [], err: true }
             }
         }
@@ -59,16 +61,18 @@ ProductPage.getInitialProps = async ({ req, query }) => {
         try {
             if (!id) return fetchTagsNode().then(tags => ({ tags }))
             let [item, tags] = await Promise.all([
-                fetchItems({ id }).then(items => item[0]),
+                fetchItems({ id }).then(items => items[0]),
                 fetchTags()
             ])
             return { item, tags }
         } catch (e) {
+            console.error(e)
             try {
                 // Try to fetch only categories
                 let tags = await fetchTags()
                 return { tags, err: true }
             } catch (e) {
+                console.error(e)
                 return { tags: [], err: true }
             }
         }

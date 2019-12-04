@@ -13,9 +13,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (Object.keys(order.products).length == 0) throw new Error("Empty products list")
 
         let id = await putOrder(order)
-        res.end(id)
+        res.end(JSON.stringify({ id }))
     } catch (error) {
         res.statusCode = 500
-        res.end(JSON.stringify(error))
+        res.end(JSON.stringify({ error: error.message }))
     }
 }
