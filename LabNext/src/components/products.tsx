@@ -51,7 +51,7 @@ export const ProductView: React.FC<StoreItem> = props => {
             }
         `}</style>
         <div className="item">
-            <ProductPreview image={props.previews[0]} alt={`${props.name} preview`} />
+            <ProductPreview image={props.previews[0] ? props.previews[0].path : ""} alt={`${props.name} preview`} />
             <div className="title">
                 {name1}
                 <br />

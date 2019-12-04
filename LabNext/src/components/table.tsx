@@ -1,9 +1,9 @@
 import { LookContext } from "./style"
 import { useContext } from "react"
 
-export interface TableColumn {
+export interface TableColumn<T = any> {
     name: string;
-    view?: (data: any) => JSX.Element
+    view?: (data: T) => JSX.Element
 }
 export interface TableViewProps {
     columns: TableColumn[];

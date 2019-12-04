@@ -12,7 +12,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             res.end(JSON.stringify({error: "No privelages"}))
         }
         let {strings, values} = JSON.parse(req.body)
+        let st = SQL(strings, ...values)
+        console.log(st)
         let data = await evalQuery(SQL(strings, ...values))
+        console.log(data)
         res.end(JSON.stringify(data))
     } catch (error) {
         console.error(error)

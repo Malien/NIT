@@ -30,7 +30,7 @@ export function toStoreItem(from: TronItem | TronItem[]): StoreItem | StoreItem[
         name: words.join(" "),
         description: from.description,
         id: from.id,
-        previews: [from.image_url],
+        previews: [{path: from.image_url, alt: null}],
         price,
         prevPrice,
         rating: 3,

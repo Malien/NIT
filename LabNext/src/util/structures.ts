@@ -1,3 +1,5 @@
+import { fromEntries } from "./pollyfilling";
+
 const top = 0;
 const parent = i => ((i + 1) >>> 1) - 1;
 const left = i => (i << 1) + 1;
@@ -132,4 +134,20 @@ export class ExtendableMat<T> {
             }
         })
     }
+}
+
+export function createLookupTable<T, U = any>(arr: T[], splitFunc: (el: T) => [string | number, U]): Record<string | number, U> {
+    return fromEntries(arr.map(splitFunc))
+}
+
+export function createArrayLookupTable<T, U = any>(arr: T[], splitFunc: (el: T) => [string | number, U]): Record<string | number, U[]> {
+    let res: Record<string | number, U[]> = {}
+    arr.map(splitFunc).forEach(([key, value]) => {
+        if (key in res) {
+            res[key].push(value)
+        } else {
+            res[key] = [value]
+        }
+    })
+    return res
 }

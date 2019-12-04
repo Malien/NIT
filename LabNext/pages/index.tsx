@@ -1,14 +1,14 @@
-import { StoreItem, TronCategory } from "../src/shared/components";
+import { StoreItem, TronCategory, Tag } from "../src/shared/components";
 import { AppFrame, Storefront } from "../src/components/common";
 import { NextPage } from "next";
-import { fetchItems, toStoreItem, fetchCachedCategories } from "../src/api/tron";
-import { fetchItems as fetchItemsNode, fetchCategories as fetchCategoriesNode } from "../src/api/nodeTron";
+import { fetchItems, fetchTags /* TODO: implement fetchCachedTags */ } from "../src/api/new";
+import { fetchItems as fetchItemsNode, fetchTags as fetchTagsNode } from "../src/api/newNode";
 import { ErrorMsg } from "../src/components/errors";
 
 interface LegginsPageProps {
     items: StoreItem[];
-    categories: TronCategory[];
-    category?: TronCategory;
+    tags: Tag[];
+    tag?: Tag;
     err?: boolean;
 }
 /**
@@ -20,9 +20,9 @@ interface LegginsPageProps {
  */
 const StorefrontPage: NextPage<LegginsPageProps> = props =>
     <AppFrame
-        path={props.category ? `/?category=${props.category.id}` : "/"}
-        name={props.category && props.category.name}
-        categories={props.categories}
+        path={props.tag ? `/?tag=${props.tag.id}` : "/"}
+        name={props.tag && props.tag.name}
+        tags={props.tags}
     >
         {props.err && <ErrorMsg msg="Error occured while loading products" />}
         <Storefront items={props.items} />
@@ -34,32 +34,35 @@ const StorefrontPage: NextPage<LegginsPageProps> = props =>
  * @param query contains parsed page querry path extension. Used to pinpoint what should be fetched.
  */
 StorefrontPage.getInitialProps = async ({ req, query }) => {
-    let categoryQuery = query.category as string
+    let categoryQuery = query.tag as string
     if (req) {
         // If req is set, than we are runnig in the server environment
         try {
-            let [items, categories] = await Promise.all([
-                fetchItemsNode(categoryQuery).then(toStoreItem),
-                fetchCategoriesNode()
+            let [items, tags] = await Promise.all([
+                fetchItemsNode(query),
+                fetchTagsNode()
             ])
-            let category = categories.find(cat => cat.id == categoryQuery)
-            return { items, categories, category }
+            let tag = tags.find(cat => String(cat.id) == categoryQuery)
+            return { items, tags, tag }
         } catch (e) {
+            console.error(e)
             try {
                 // Try to load only categories
-                let categories = await fetchCategoriesNode()
-                return { items: [], categories, err: true }
+                let tags = await fetchTagsNode()
+                let tag = tags.find(cat => String(cat.id) == categoryQuery)
+                return { items: [], tags, tag, err: true }
             } catch (e) {
-                return { items: [], categories: [], err: true }
+                console.error(e)
+                return { items: [], tags: [], err: true }
             }
         }
     } else {
-        let [items, categories] = await Promise.all([
-            fetchItems(categoryQuery).then(toStoreItem),
-            fetchCachedCategories()
+        let [items, tags] = await Promise.all([
+            fetchItems(query),
+            fetchTags()
         ])
-        let category = categories.find(cat => cat.id == categoryQuery)
-        return { items, categories, category }
+        let tag = tags.find(cat => String(cat.id) == categoryQuery)
+        return { items, tags, tag }
     }
 }
 

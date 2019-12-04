@@ -17,12 +17,18 @@ export interface Preview {
     path: string;
     alt: string | null;
 }
+
+export interface APIPreview {
+    path: string;
+    alt: string | null;
+}
+
 /**
  * Item that supposed to be used in the store
  */ 
 export interface StoreItem extends StrippedItem {
     outOfStock?: boolean
-    previews: string[];
+    previews: APIPreview[];
     tags: Tag[];
     size?: string;
     criteriaTable?: {[key: string]: any};

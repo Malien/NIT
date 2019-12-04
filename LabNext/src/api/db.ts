@@ -105,7 +105,7 @@ export async function getItems({ tag, id, limit, offset }: ItemDBRequest): Promi
                 ON ItemPreviews.previewID = Previews.id 
                 WHERE ItemPreviews.itemID = ${item.id};`),
         db.all(
-            SQL`SELECT Tags.name
+            SQL`SELECT Tags.id, Tags.name, Tags.description
                 FROM ItemTags 
                 JOIN Tags 
                 ON ItemTags.tagID = Tags.id 
@@ -155,7 +155,7 @@ export async function getUsers({limit, offset} : Limited): Promise<User[]> {
  */
 export async function invalidateTokens(req: UserDBRequest): Promise<void> {
     let hasId = typeof req.id !== "undefined"
-    if (!hasId || !req.username) throw new Error("No id or username is provided to invalidate token")
+    if (!hasId && !req.username) throw new Error("No id or username is provided to invalidate token")
     let db = await dbPromise
 
     let statement = SQL`UPDATE Users SET tokenRevision = tokenRevision + 1 WHERE`

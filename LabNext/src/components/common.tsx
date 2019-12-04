@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { deploymentPrefix, StoreItem, TronCategory } from "../shared/components";
+import { deploymentPrefix, StoreItem, TronCategory, Tag } from "../shared/components";
 import { ErrorMsg, StdErrContext, useMessageDispatch } from "./errors";
 import { useClick, useKeyDown, useMobileScroll, useTheme, useWindowBounds } from "./hooks";
 import { NoSSR, VSpaced } from "./layout";
@@ -148,7 +148,7 @@ export const NavLink: React.FC<NavLinkProps> = props => {
 interface SidebarProps {
     path?: string;
     hidden?: boolean;
-    categories: TronCategory[];
+    tags: Tag[];
 }
 /**
  * Sidebar that contains Navigation 'n stuff
@@ -158,13 +158,13 @@ interface SidebarProps {
  */
 export const Sidebar: React.FC<SidebarProps> = props => {
     let theme = useContext(ThemeContext)
-    let links = props.categories.map(category =>
+    let links = props.tags.map(tag =>
         <NavLink 
-            key={category.id}
-            selected={props.path == `${deploymentPrefix}/?category=${category.id}`} 
-            label={category.name} 
-            href={`${deploymentPrefix}/?category=${category.id}`}
-            tooltip={category.description} 
+            key={tag.id}
+            selected={props.path == `${deploymentPrefix}/?tag=${tag.id}`} 
+            label={tag.name} 
+            href={`${deploymentPrefix}/?tag=${tag.id}`}
+            tooltip={tag.description || undefined} 
         />
     )
     return <>
@@ -293,7 +293,7 @@ export const Footer: React.FC = props => {
 interface AppFrameProps {
     path?: string;
     name?: string;
-    categories: TronCategory[];
+    tags: Tag[];
 }
 /**
  * Main component that is responsible of common things, such as headers, footer, cart and message handling, and other common stuff between the pages
@@ -374,7 +374,7 @@ export const AppFrame: React.FC<AppFrameProps> = props => {
                 </Head>
                 <ErrorMsg msg={msg} />
                 <div className="app">
-                    <Sidebar path={deploymentPrefix + props.path} hidden={!sidebarShown} categories={props.categories} />
+                    <Sidebar path={deploymentPrefix + props.path} hidden={!sidebarShown} tags={props.tags} />
                     {!mobile ? <div className="spacer" /> : undefined}
                     <NoSSR>
                         <div className="content">

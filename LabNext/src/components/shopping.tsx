@@ -310,7 +310,7 @@ export const SCItemView: React.FC<SCItemViewProps> = props => {
                 margin: 0; 
             }
         `}</style>
-        <img alt={props.name + " image"} src={(props.previews[0]) ? props.previews[0] : defaultImage} />
+        <img alt={props.name + " image"} src={(props.previews[0]) ? props.previews[0].path : defaultImage} />
         <span>{props.name}</span>
         <input
             min={0}

@@ -5,7 +5,7 @@ import { ThemeContext, LookContext } from "../src/components/style";
 import { useTheme } from "../src/components/hooks";
 import { useContext } from "react";
 
-const AdminPanel = dynamic(() => import("../src/components/adminPanel"), {loading: () => <>Loading...</>})
+const AdminPanel = dynamic(() => import("../src/components/admin/index"), {loading: () => <>Loading...</>})
 
 //TODO: Server-side render admin panel (auth user with refresh token if provided upon request)
 const AdminPagePage: NextPage = () => {

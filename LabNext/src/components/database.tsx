@@ -20,15 +20,17 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({ loading, err, data, 
     if (err) return <div>{JSON.stringify(err)}</div>
     if (!data) return <div>No data</div>
     if (!(auth && auth.token.tokenInfo && auth.token.accessToken && auth.token.tokenInfo.admin)) return <div>Not authorized</div>
-    
-    return <TableView columns={columns} entries={data} onDelete={onDelete} />
+
+    return <TableView columns={columns} entries={data} onDelete={(row) => {
+        if (onDelete) onDelete(row.id)
+    }} />
 }
 
-export function useDatabase<T = any>(table: string) {
+export function useDatabase<T>(table: string) {
     let [updateCounter, setUpdateCounter] = useState(0)
     let statement = SQL`SELECT * FROM `
     statement.append(table)
-    let { data, loading, err } = useErrData<T>("/api/query", { body: JSON.stringify(statement), method: "POST" }, [updateCounter])
+    let { data, loading, err } = useErrData<T[]>("/api/query", { body: JSON.stringify(statement), method: "POST" }, [updateCounter])
     let auth = useContext(AuthContext)
 
     const updater: dbChangeHandler = (id, field, value) => {
@@ -38,7 +40,7 @@ export function useDatabase<T = any>(table: string) {
         statement.append(field)
         statement.append(SQL`=${value} WHERE id=${id}`)
 
-        fetch("/api/eval", {
+        return fetch("/api/eval", {
             body: JSON.stringify(statement),
             method: "POST",
             headers: {
@@ -51,11 +53,19 @@ export function useDatabase<T = any>(table: string) {
             .catch(console.error)
     }
 
-    const deleter = (id: number | string) => {
+    const deleter = (specifier: Record<string, any>) => {
         let statement = SQL`DELETE FROM `
         statement.append(table)
-        statement.append(SQL` WHERE id=${id}`)
-        fetch("/api/eval", {
+        let entries = Object.entries(specifier)
+        if (entries.length !== 0) statement.append(" WHERE ")
+        entries.forEach(([columnName, value], idx) => {
+            statement.append(columnName)
+            statement.append(SQL`=${value}`)
+            if (idx !== entries.length - 1) {
+                statement.append(" AND ")
+            }
+        })
+        return fetch("/api/eval", {
             body: JSON.stringify(statement),
             method: "POST",
             headers: {
@@ -68,5 +78,34 @@ export function useDatabase<T = any>(table: string) {
             .catch(console.error)
     }
 
-    return { loading, data, err, updater, deleter }
+    const adder = (element: any) => {
+        let entries = Object.entries(element)
+        let last = entries.length - 1
+        let statement = SQL`INSERT INTO `
+        statement.append(table)
+        statement.append(" (")
+        entries.forEach(([key], idx) => {
+            if (idx !== last) statement.append(`${key}, `)
+        })
+        if (entries.length != 0) statement.append(`${entries[last][0]}`)
+        statement.append(") VALUES (")
+        entries.forEach(([key, value], idx) => {
+            if (idx !== last) statement.append(SQL`${value}, `)
+        })
+        if (entries.length != 0) statement.append(SQL`${entries[last][1]}`)
+        statement.append(")")
+        return fetch("/api/eval", {
+            body: JSON.stringify(statement),
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${auth!.token.accessToken!}`
+            }
+        })
+            .then(res => res.json())
+            .then(console.log)
+            .then(() => setUpdateCounter(updateCounter + 1))
+            .catch(console.error)
+    }
+
+    return { loading, data, err, updater, deleter, adder }
 }

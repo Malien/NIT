@@ -215,7 +215,7 @@ export const GridItem: React.FC<GridItemProps> = props => {
             }
         `}</style>
         <div className="container" ref={contentRef}>
-            <img src={props.previews[0]} alt="Product image" />
+            <img src={props.previews[0] ? props.previews[0].path : ""} alt="Product image" />
             <div className={classes({"dimmer": true, "active": hovered})}/>
             <div className={classes({"scroll": true, "animated": inited})} ref={scrollRef}>
                 <div className="info" ref={infoRef}>

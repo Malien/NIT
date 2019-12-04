@@ -13,6 +13,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         } else {
             let {strings, values} = JSON.parse(req.body)
             let qres = await query(SQL(strings, ...values))
+            // console.log(strings, values, qres)
             res.end(JSON.stringify(qres))
         }
     } catch (error) {
