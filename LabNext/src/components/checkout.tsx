@@ -31,9 +31,9 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
     let stderr = useContext(StdErrContext)
     let mounted = useMounted()
     let [dismissed, setDismissed] = useState(false)
-    let [email, setEmail] = useInputState({value: props.email, pattern: ".+@\\w+\\.\\w+"})
-    let [name, setName] = useInputState({value: props.name})
-    let [address, setAddress] = useInputState({value: props.address})
+    let [email, setEmail] = useInputState({value: props.email, pattern: ".+@\\w+\\..+"})
+    let [name, setName] = useInputState({value: props.name, pattern: ".+"})
+    let [address, setAddress] = useInputState({value: props.address, pattern: ".+"})
     let [phone, setPhone] = useInputState({value: props.phone, pattern: "\\+380\\d{9}"})
     let [isPhone, setIsPhone] = useState(true)
     let formRef = useRef<HTMLFormElement>(null)
@@ -269,17 +269,19 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                             name="name" 
                             value={name.value} 
                             placeholder="Full name"
-                            className="text-field"
+                            pattern=".+"
+                            className={classes({"text-field": true, "invalid": !name.valid})}
                             onChange={(event) => {
                                 setName(event.target.value)
                             }}
-                        />
+                            />
                         <input 
                             type="text" 
                             name="address" 
                             value={address.value} 
                             placeholder="Delivery address"
-                            className="text-field"
+                            className={classes({"text-field": true, "invalid": !address.valid})}
+                            pattern=".+"
                             onChange={(event) => {
                                 setAddress(event.target.value)
                             }}
@@ -306,7 +308,7 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                                 placeholder="Phone number"
                                 pattern="\+380\d{9}" 
                                 autoComplete="tel" 
-                                className={classes({"text-field": true, invalid: !phone.valid})}
+                                className={classes({"text-field": true, invalid: isPhone && !phone.valid})}
                                 onChange={(event) => {
                                     setPhone(event.target.value)
                                 }}
@@ -330,8 +332,8 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                                 value={email.value} 
                                 disabled={isPhone}
                                 placeholder="E-mail" 
-                                pattern=".+@\w+\.\w+" 
-                                className={classes({"text-field": true, invalid: !email.valid})}
+                                pattern=".+@\w+\..+" 
+                                className={classes({"text-field": true, invalid: !isPhone && !email.valid})}
                                 onChange={(event) => {
                                     setEmail(event.target.value)
                                 }}
@@ -340,6 +342,10 @@ export const CheckoutPane: React.FC<CheckoutPaneProps> = props => {
                         <button disabled={!buyable} onClick={(e) => {
                             e.preventDefault()
                             let form = formRef.current
+                            if (isPhone) setPhone(phone.value)
+                            else setEmail(email.value)
+                            setName(name.value)
+                            setAddress(address.value)
                             if (form) {
                                 let valid = form.checkValidity()
                                 if (valid && ((isPhone && phone.valid) || email.valid)) {

@@ -23,6 +23,7 @@ export const ProductView: React.FC<StoreItem> = props => {
                 font-size: ${look.extraLarge}px;
                 line-height: ${look.strongLineHeight};
                 z-index: 2;
+                margin-top: 20px;
                 display: inline-block;
             }
             .item {

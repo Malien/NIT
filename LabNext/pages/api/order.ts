@@ -11,6 +11,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (!order.address) throw new Error("Address is not provided")
         if (!order.products) throw new Error("No products provided")
         if (Object.keys(order.products).length == 0) throw new Error("Empty products list")
+        if (order.phone && !/^\+380\d{9}$/.test(order.phone)) throw new Error("Wrong phone format")
+        if (order.email && !/^\w+@\w+\.\w+$/.test(order.email)) throw new Error("Wrong email format")
 
         let id = await putOrder(order)
         res.end(JSON.stringify({ id }))
