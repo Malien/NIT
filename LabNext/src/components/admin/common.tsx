@@ -1,6 +1,5 @@
 import { Styles } from "react-select"
-import { useContext, useState, Dispatch } from "react"
-import { ThemeContext, LookContext } from "../style"
+import { useState, Dispatch } from "react"
 import { DBItem } from "../../shared/components"
 import { TableColumn } from "../table"
 
