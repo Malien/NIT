@@ -1,3 +1,4 @@
+[![DeepScan grade](https://deepscan.io/api/teams/8152/projects/10302/branches/140830/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=8152&pid=10302&bid=140830)
 ## Воу воу палехчи, чого тут дві теки?
 Ну тут я трохи "напартачив"(?), мабуть. Так сталось, що на тср я вирішив, що мені не подобався лейаут того, що я робив на на перші дві лаби. I cаме тому я чомусь почав робити версію на react/next/typescript-і.
 
