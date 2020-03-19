@@ -6,7 +6,7 @@ import SQL, { SQLStatement } from "sql-template-strings";
 
 export const dbPromise = initDB({
     dbLocation: "fastshop.db",
-    from: "./src/api/configuration.sql",
+    from: "./src/api/configuration.sqlite",
     withAdmin: {
         username: process.env.NEXT_SERVER_ADMIN_USERNAME || "admin",
         password: process.env.NEXT_SERVER_ADMIN_PASSWORD || "admin"
@@ -31,7 +31,7 @@ async function initDB({ dbLocation = ":memory:", from, withAdmin }: {
     let db: Database
     if (from) {
         let strPromise = new Promise<string>((resolve, reject) => {
-            readFile("./src/api/configuration.sqlite", (err, data) => {
+            readFile(from, (err, data) => {
                 if (err) reject(err)
                 else resolve(data.toString())
             })
