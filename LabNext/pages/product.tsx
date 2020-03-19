@@ -1,9 +1,7 @@
 import { NextPage } from "next";
-import { TronCategory, StoreItem, Tag } from "../src/shared/components";
+import { StoreItem, Tag } from "../src/shared/components";
 import { AppFrame } from "../src/components/common";
 import { ProductView, NoProduct } from "../src/components/products";
-// import { fetchItem as fetchItemNode, fetchCategories as fetchCategoriesNode } from "../src/api/nodeTron";
-// import { toStoreItem, fetchItem, fetchCachedCategories } from "../src/api/tron";
 import { fetchItems, fetchTags } from "../src/api/new";
 import { fetchItems as fetchItemsNode, fetchTags as fetchTagsNode } from "../src/api/newNode";
 import { ErrorMsg } from "../src/components/errors";

@@ -461,7 +461,7 @@ export function useShoppingCart(): [SCProps, React.Dispatch<SCAction>] {
 
     useEffect(() => {
         let version = localStorage.getItem("cart_version")
-        if (!version || !(version == SHOPPING_CART_VERSION as any)) {
+        if (!version || version !== SHOPPING_CART_VERSION) {
             localStorage.setItem("cart", JSON.stringify({ items: [] }))
             localStorage.setItem("cart_version", String(SHOPPING_CART_VERSION))
         } else {

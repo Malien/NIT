@@ -1,8 +1,7 @@
 import { sign, verify as _verify, VerifyOptions } from "jsonwebtoken";
-import { User, deploymentPrefix, TokenInfo } from "../../src/shared/components";
+import { User, TokenInfo } from "../../src/shared/components";
 import { IncomingMessage } from "http";
 import { getUser } from "./db";
-import { useState, useEffect } from "react";
 
 export function createAccessToken(user: User) {
     // if (!process.env.NEXT_SERVER_ACCESS_TOKEN) throw new Error("Cannot find secret in .env")
@@ -36,7 +35,7 @@ export async function withAuth(req: IncomingMessage): Promise<TokenInfo> {
         let payload = await verify(token, process.env.NEXT_SERVER_ACCESS_TOKEN_SECRET!) as TokenInfo
         let user = await getUser({id: payload.id})
         if (!user) throw new Error("User not found")
-        if (user.tokenRevision != payload.tokenRevision) new Error("Invalid token")
+        if (user.tokenRevision != payload.tokenRevision) throw new Error("Invalid token")
         return payload
     } catch (e) {
         if (e instanceof Error) {

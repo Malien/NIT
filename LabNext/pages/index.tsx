@@ -1,11 +1,11 @@
-import { StoreItem, TronCategory, Tag } from "../src/shared/components";
+import { StoreItem, Tag } from "../src/shared/components";
 import { AppFrame, Storefront } from "../src/components/common";
 import { NextPage } from "next";
-import { fetchItems, fetchTags /* TODO: implement fetchCachedTags */ } from "../src/api/new";
+import { fetchItems, fetchTags } from "../src/api/new";
 import { fetchItems as fetchItemsNode, fetchTags as fetchTagsNode } from "../src/api/newNode";
 import { ErrorMsg } from "../src/components/errors";
 
-interface LegginsPageProps {
+interface IndexPageProps {
     items: StoreItem[];
     tags: Tag[];
     tag?: Tag;
@@ -18,7 +18,7 @@ interface LegginsPageProps {
  * @param category current selected category
  * @param err if true error message is displayed
  */
-const StorefrontPage: NextPage<LegginsPageProps> = props =>
+const StorefrontPage: NextPage<IndexPageProps> = props =>
     <AppFrame
         path={props.tag ? `/?tag=${props.tag.id}` : "/"}
         name={props.tag && props.tag.name}
@@ -38,7 +38,7 @@ StorefrontPage.getInitialProps = async ({ req, query }) => {
     if (req) {
         // If req is set, than we are runnig in the server environment
         try {
-            let [items, tags] = await Promise.all([
+            let [items, tags] = await Promise.all<StoreItem[], Tag[]>([
                 fetchItemsNode(query),
                 fetchTagsNode()
             ])
@@ -57,7 +57,7 @@ StorefrontPage.getInitialProps = async ({ req, query }) => {
             }
         }
     } else {
-        let [items, tags] = await Promise.all([
+        let [items, tags] = await Promise.all<StoreItem[], Tag[]>([
             fetchItems(query),
             fetchTags()
         ])

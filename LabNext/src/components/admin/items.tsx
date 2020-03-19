@@ -1,11 +1,10 @@
-import { useEffect, useReducer, useState, Dispatch } from "react"
+import { useEffect, useReducer, useState } from "react"
 import Select, { ValueType } from "react-select"
 import { DBItem, Tag, Preview } from "../../shared/components"
 import { createArrayLookupTable, createLookupTable } from "../../util/structures"
 import { DatabaseView, useDatabase } from "../database"
 import { TableColumn } from "../table"
-import { AddRowView, cellReducer, createRowElement, itemColumn, selectStyle, CellAction } from "./common"
-import { number } from "prop-types"
+import { AddRowView, cellReducer, createRowElement, itemColumn, selectStyle } from "./common"
 export const ItemsView: React.FC = () => {
     let {
         data: items,

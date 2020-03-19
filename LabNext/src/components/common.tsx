@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { deploymentPrefix, StoreItem, TronCategory, Tag } from "../shared/components";
+import { deploymentPrefix, StoreItem, Tag } from "../shared/components";
 import { ErrorMsg, StdErrContext, useMessageDispatch } from "./errors";
 import { useClick, useKeyDown, useMobileScroll, useTheme, useWindowBounds } from "./hooks";
 import { NoSSR, VSpaced } from "./layout";

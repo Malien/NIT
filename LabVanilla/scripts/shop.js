@@ -21,8 +21,8 @@ function img(props) {
     return basicElement("img", props)
 }
 
-function a(props) {
-    return basicElement("a", props)
+function a(props, children) {
+    return basicElement("a", props, children)
 }
 
 function button(props, children) {
@@ -245,19 +245,6 @@ window.onload = function() {
     })
 
     globalItemDispatch = reducer(stateContainer, setCartState, cartItemReducer, cartList)
-
-    // globalItemDispatch({
-    //         type: "add",
-    //         item: hats[0]
-    //     })
-    // globalItemDispatch({
-    //         type: "add",
-    //         item: hats[0]
-    //     })
-    // globalItemDispatch({
-    //         type: "add",
-    //         item: hats[1]
-    //     })
 
     if (hatsGrid) populateGrid(hatsGrid, hats)
     if (legginsGrid) populateGrid(legginsGrid, leggins)

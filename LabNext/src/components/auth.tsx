@@ -134,7 +134,7 @@ export const Authed: React.FC<AuthedProps> = props => {
     let { token } = auth
     if (!token) return <>{props.fallback}</>
     if (token.needsLogin) return <>{props.reloginFallback ? props.reloginFallback : props.fallback}</>
-    if (!token.tokenInfo || !token.accessToken) return <>{props.fallback}</>
     if (props.admin && !token.tokenInfo) return <>{props.plebFallback ? props.plebFallback : props.fallback}</>
+    if (!token.tokenInfo || !token.accessToken) return <>{props.fallback}</>
     return <>{props.children}</>
 }

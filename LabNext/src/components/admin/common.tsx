@@ -94,24 +94,19 @@ export type CellConstructor = (idx: number) => JSX.Element
 interface AddRowViewProps {
     onAdd: () => void;
 }
-export const AddRowView: React.FC<AddRowViewProps> = props => {
-    let theme = useContext(ThemeContext)
-    let look = useContext(LookContext)
-
-    return <>
-        <style jsx>{`
-            .fields {
-                display: flex;
-            }
-            .container {
-                display: flex;
-            }
-        `}</style>
-        <div className="container">
-            <button className="add" onClick={() => { props.onAdd() }}>+</button>
-            <div className="fields">
-                {props.children}
-            </div>
+export const AddRowView: React.FC<AddRowViewProps> = props => <>
+    <style jsx>{`
+        .fields {
+            display: flex;
+        }
+        .container {
+            display: flex;
+        }
+    `}</style>
+    <div className="container">
+        <button className="add" onClick={() => { props.onAdd() }}>+</button>
+        <div className="fields">
+            {props.children}
         </div>
-    </>
-}
+    </div>
+</>
